@@ -124,16 +124,31 @@ input[readonly]{background:#f7fafd;color:var(--mu)}
 .modal h3{font-size:16px;font-weight:800;color:var(--p);margin-bottom:18px}
 .modal-close{float:left;background:none;border:none;font-size:20px;cursor:pointer;color:var(--mu)}
 /* PRINT */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @media print{
-  @page{size:A4;margin:13mm 11mm}
-  body{background:#fff}
+  @page{size:A4;margin:8mm 8mm}
+  body{background:#fff;font-size:9px}
   .ah,.nav,.ph,.add-btn,.del,#printBtn,button,.notif,.modal-bg{display:none!important}
   .page{display:none!important;padding:0;max-width:100%}
   #page-report{display:block!important}
-  .card{box-shadow:none;border:1px solid #ccc;border-radius:5px;padding:8px 10px;margin-bottom:8px;page-break-inside:avoid}
-  .sc{grid-template-columns:repeat(3,1fr)!important}
-  input{border:none!important;background:transparent!important;padding:1px 0!important;font-size:10px}
+  .card{box-shadow:none;border:1px solid #ccc;border-radius:4px;padding:5px 7px;margin-bottom:5px;page-break-inside:avoid}
+  .sc{grid-template-columns:repeat(6,1fr)!important;gap:4px!important;margin-bottom:5px!important}
+  .scard{padding:5px 4px!important}
+  .sl{font-size:8px!important;margin-bottom:2px!important}
+  .sv{font-size:10px!important}
+  table{font-size:9px}
+  th{padding:4px 6px!important;font-size:8px!important}
+  td{padding:3px 6px!important}
+  .ct{font-size:10px!important;margin-bottom:5px!important;padding-bottom:4px!important}
+  .fb{font-size:8px!important;padding:5px 8px!important;margin-top:5px!important;line-height:1.5!important}
+  .rb{padding:8px!important;margin-top:6px!important}
+  .rb .rl{font-size:10px!important;margin-bottom:3px!important}
+  .rb .rv{font-size:16px!important}
+  input{border:none!important;background:transparent!important;padding:1px 0!important;font-size:9px!important}
   .ph2{display:block!important}
+  .ph2 h2{font-size:13px!important}
+  .ph2 p{font-size:8px!important}
+  #page-report > div:last-child{display:none!important}
 }
 .ph2{display:none;text-align:center;margin-bottom:14px;border-bottom:3px solid var(--p);padding-bottom:10px}
 .ph2 h2{font-size:17px;font-weight:800;color:var(--p)}
@@ -164,6 +179,11 @@ input[readonly]{background:#f7fafd;color:var(--mu)}
     <button class="lbtn" onclick="doLogin()">دخول</button>
     <div class="lerr" id="lErr">اسم المستخدم أو كلمة المرور غير صحيحة</div>
     <div style="margin-top:14px;font-size:10px;color:#bbb;border-top:1px solid #eee;padding-top:10px">admin: 1234 | cashier1: 1111 | cashier2: 2222</div>
+    <div style="margin-top:12px;border-top:1px solid #f0f0f0;padding-top:10px;text-align:center">
+      <div style="font-size:10px;color:#bbb;margin-bottom:3px">تطوير وبرمجة</div>
+      <div style="font-size:12px;font-weight:700;color:var(--p)">علوي الحذيفي</div>
+      <div style="font-size:11px;color:#aaa;margin-top:2px">📱 0551156419</div>
+    </div>
   </div>
 </div>
 
@@ -172,7 +192,10 @@ input[readonly]{background:#f7fafd;color:var(--mu)}
   <div><h1>🏦 أركان لمنيف التجارية</h1><div class="sub">نظام إقفال الصندوق | س.ت 5950028336</div></div>
   <div style="display:flex;align-items:center;gap:10px">
     <div class="db" id="dateDisplay"></div>
-    <div id="saveIndicator" style="font-size:10px;color:rgba(255,255,255,.6);min-width:80px;text-align:center"></div>
+    <div id="saveIndicator" style="font-size:10px;color:rgba(255,255,255,.6);min-width:80px;text-align:center;display:flex;align-items:center;gap:5px">
+      <span id="syncLiveDot" style="width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;transition:background .3s"></span>
+      <span id="syncLiveText"></span>
+    </div>
     <div class="ub" id="uBadge" onclick="logout()"><span id="uName">—</span><span style="font-size:10px;opacity:.7">خروج</span></div>
   </div>
 </div>
@@ -458,32 +481,81 @@ input[readonly]{background:#f7fafd;color:var(--mu)}
   <div class="ph"><div class="pi">⚙️</div><h2>لوحة الإدارة</h2></div>
 
   <!-- بيانات الموظفين -->
-  <div class="asec">
+  <div class="asec" id="adminDataSection">
     <h3>📊 بيانات اليوم من أمناء الصندوق</h3>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div id="lastRefreshTime" style="font-size:11px;color:var(--mu)">—</div>
       <div style="display:flex;align-items:center;gap:6px">
-        <div id="syncDot" style="width:8px;height:8px;border-radius:50%;background:#ccc"></div>
-        <span style="font-size:11px;color:var(--mu)" id="syncStatus">غير متصل</span>
+        <div id="syncDot" style="width:8px;height:8px;border-radius:50%;background:#ccc;animation:pulse 2s infinite"></div>
+        <span style="font-size:11px;color:var(--mu)" id="syncStatus">جاري الاتصال...</span>
       </div>
     </div>
     <div id="adminDataView"><div style="text-align:center;color:var(--mu);padding:20px">جاري تحميل البيانات...</div></div>
     <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
       <button class="btn bp" onclick="loadAdminData()">🔄 تحديث الآن</button>
-      <span style="font-size:11px;color:var(--mu)">يتحدث تلقائياً كل 30 ثانية</span>
+      <span style="font-size:11px;color:var(--mu)">🔴 مزامنة فورية تلقائية</span>
     </div>
   </div>
 
   <!-- إدارة المستخدمين -->
-  <div class="asec">
+  <div class="asec" id="adminUserMgmtSection">
     <h3>👥 إدارة المستخدمين والصلاحيات</h3>
     <div id="userMgmt"></div>
   </div>
 
   <!-- ملخص مقارن -->
-  <div class="asec">
+  <div class="asec" id="adminCompareSection">
     <h3>📈 جدول مقارن</h3>
     <div id="adminCompare"><div style="text-align:center;color:var(--mu);padding:16px;font-size:13px">اضغط تحديث لعرض البيانات</div></div>
+  </div>
+
+  <!-- عرض تقرير مستخدم محدد -->
+  <div class="asec" id="userReportSection" style="display:none">
+    <h3 id="userReportTitle">📋 تقرير المستخدم</h3>
+    <div id="userReportContent"></div>
+    <div style="text-align:center;margin-top:12px">
+      <button class="btn bp" onclick="printUserReport()" style="margin-left:8px">🖨️ طباعة التقرير</button>
+      <button class="btn bw" onclick="document.getElementById('userReportSection').style.display='none'">✕ إغلاق</button>
+    </div>
+  </div>
+
+  <!-- إدارة التحديثات -->
+  <div class="asec" id="adminUpdateSection">
+    <h3>🔗 تحديث النظام عبر رابط</h3>
+    <div id="updateStatusBox" style="background:#f7f9fc;border:1.5px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div id="updateDot" style="width:10px;height:10px;border-radius:50%;background:#ccc;flex-shrink:0"></div>
+        <div>
+          <div id="updateStatusText" style="font-size:13px;font-weight:700;color:var(--p)">جاري التحقق من التحديثات...</div>
+          <div id="updateVersionInfo" style="font-size:11px;color:var(--mu);margin-top:2px">—</div>
+        </div>
+      </div>
+      <div id="updateActionBox" style="display:none">
+        <div style="background:#fff3cd;border:1.5px solid #fac775;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;color:#7a5500">
+          ⚠️ <strong>يتوجب على جميع المستخدمين إعادة تحميل الصفحة</strong> للحصول على الإصدار الجديد.
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn bp" onclick="applyUpdate()">⬇️ تحديث الآن</button>
+          <button class="btn bw" onclick="notifyAllUsersUpdate()">📢 إشعار جميع المستخدمين</button>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="ig">
+        <label style="font-size:12px;font-weight:700;color:var(--mu)">🔗 رابط ملف التحديث (URL مباشر)</label>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <input type="text" id="updateUrlInput" placeholder="https://example.com/index.html" style="flex:1;font-size:12px">
+          <button class="btn bp" onclick="saveUpdateUrl()" style="white-space:nowrap">💾 حفظ</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn bs" onclick="checkForUpdate()">🔍 فحص التحديثات</button>
+        <button class="btn bw" onclick="clearUpdateUrl()">🗑️ حذف الرابط</button>
+      </div>
+      <div class="fb">
+        <strong>كيفية الاستخدام:</strong> ضع رابط ملف <code>index.html</code> المحدّث (مثل GitHub Raw أو أي رابط مباشر). سيتحقق النظام تلقائياً كل ساعة، ويُشعر المدير عند صدور نسخة جديدة.
+      </div>
+    </div>
   </div>
 </div>
 
@@ -512,25 +584,61 @@ input[readonly]{background:#f7fafd;color:var(--mu)}
 <!-- إشعار -->
 <div class="notif" id="notif"></div>
 
+<!-- بانر التحديث (يظهر للجميع) -->
+<div id="updateBanner" style="display:none;position:fixed;top:56px;left:0;right:0;z-index:4000;background:linear-gradient(135deg,#1a5c3a,#2056a0);color:#fff;padding:10px 16px;text-align:center;box-shadow:0 3px 12px rgba(0,0,0,.3)">
+  <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
+    <span style="font-size:13px;font-weight:700">🆕 يوجد تحديث جديد للنظام</span>
+    <button onclick="applyUpdate()" style="background:#fff;color:#1a3a5c;border:none;border-radius:8px;padding:6px 16px;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬇️ تحديث الآن</button>
+    <button onclick="document.getElementById('updateBanner').style.display='none'" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-family:Tajawal,sans-serif;font-size:12px;cursor:pointer">تذكيري لاحقاً</button>
+  </div>
+</div>
+
+<!-- المطور -->
+<div style="text-align:center;padding:14px 0 20px;font-size:11px;color:var(--mu);border-top:1px solid var(--bd);margin-top:10px">
+  تطوير وبرمجة: <strong style="color:var(--p)">علوي الحذيفي</strong>
+  <span style="margin:0 8px;color:var(--bd)">|</span>
+  <span>📱 0551156419</span>
+</div>
+
 <script>
 // ===== نظام المستخدمين =====
+// الصلاحيات المتاحة:
+// صفحات التنقل الأساسية
 const ALL_PAGES = [
-  {id:'inventory',label:'جرد الصندوق'},
-  {id:'sales',label:'المبيعات'},
-  {id:'returns',label:'المردودات'},
-  {id:'expenses',label:'الخرجيات'},
-  {id:'deposits',label:'الإيداعات'},
-  {id:'receipts',label:'المقبوضات'},
-  {id:'report',label:'التقرير النهائي'},
-  {id:'morning',label:'إقفال الصباح'},
-  {id:'evening',label:'إقفال المساء'},
+  {id:'inventory', label:'جرد الصندوق',      adminOnly:false},
+  {id:'sales',     label:'المبيعات',           adminOnly:false},
+  {id:'returns',   label:'المردودات',          adminOnly:false},
+  {id:'expenses',  label:'الخرجيات',          adminOnly:false},
+  {id:'deposits',  label:'الإيداعات',         adminOnly:false},
+  {id:'receipts',  label:'المقبوضات',         adminOnly:false},
+  {id:'report',    label:'التقرير النهائي',   adminOnly:false},
+  {id:'morning',   label:'إقفال الصباح',      adminOnly:false},
+  {id:'evening',   label:'إقفال المساء',      adminOnly:false},
+  {id:'admin',     label:'لوحة الإدارة',      adminOnly:false},
+];
+
+// الصلاحيات الخاصة (Extra Permissions)
+const EXTRA_PERMS = [
+  {id:'view_report_summary',  label:'الاطلاع على التقرير النهائي (ملخص فقط)',        group:'تقارير'},
+  {id:'view_report_full',     label:'الاطلاع على التقرير النهائي (كامل)',             group:'تقارير'},
+  {id:'view_morning_report',  label:'الاطلاع على تقرير إقفال الصباح',                group:'تقارير'},
+  {id:'view_evening_report',  label:'الاطلاع على تقرير إقفال المساء',                group:'تقارير'},
+  {id:'view_other_inventory', label:'الاطلاع على جرد الخزينة للمستخدمين الآخرين',   group:'بيانات المستخدمين'},
+  {id:'view_other_shifts',    label:'الاطلاع على إقفالات المستخدمين الآخرين',        group:'بيانات المستخدمين'},
+  {id:'manage_users',         label:'إدارة المستخدمين والصلاحيات',                   group:'إدارة'},
 ];
 
 // بيانات المستخدمين (محملة من storage أو افتراضية)
 let USERS = {
-  admin:    { name:'المدير الرئيسي',  pass:'1234', role:'admin',   perms: ALL_PAGES.map(p=>p.id) },
-  cashier1: { name:'أمين الصندوق 1', pass:'1111', role:'cashier', perms: ['inventory','sales','returns','expenses','deposits','receipts','report','morning','evening'] },
-  cashier2: { name:'أمين الصندوق 2', pass:'2222', role:'cashier', perms: ['inventory','sales','returns','expenses','deposits','receipts','report','morning','evening'] },
+  admin:    { name:'المدير الرئيسي',  pass:'1234', role:'admin',
+              perms: ALL_PAGES.map(p=>p.id),
+              extraPerms: EXTRA_PERMS.map(p=>p.id) },
+  cashier1: { name:'أمين الصندوق 1', pass:'1111', role:'cashier',
+              perms: ['inventory','sales','returns','expenses','deposits','receipts','morning','evening'],
+              extraPerms: [] },
+  cashier2: { name:'أمين الصندوق 2', pass:'2222', role:'cashier',
+              perms: ['inventory','sales','returns','expenses','deposits','receipts','morning','evening'],
+              extraPerms: [] },
 };
 
 let currentUser = null;
@@ -554,9 +662,9 @@ function recompute(){
 
 // ===== إدارة المستخدمين =====
 function loadUserSettings() { /* الخيارات ثابتة في HTML */ }
-function populateLoginSelect() { /* الخيارات ثابتة في HTML */ }
+function populateLoginSelect() { updateLoginSelect(); }
 async function saveUserSettings() {
-  try { if(window.storage) await window.storage.set('users_config', JSON.stringify(USERS), true); } catch(e) {}
+  try { await saveData('arkan_users_config', USERS, false); } catch(e) {}
 }
 
 // ===== تسجيل الدخول =====
@@ -568,26 +676,41 @@ function doLogin() {
   if (!USERS[u]) { errEl.textContent='المستخدم غير موجود'; errEl.style.display='block'; return; }
   if (USERS[u].pass !== p) { errEl.textContent='كلمة المرور غير صحيحة'; errEl.style.display='block'; return; }
   errEl.style.display = 'none';
-  currentUser = { id:u, name:USERS[u].name, pass:USERS[u].pass, role:USERS[u].role, perms:USERS[u].perms };
+  currentUser = { id:u, name:USERS[u].name, pass:USERS[u].pass, role:USERS[u].role, perms:USERS[u].perms, extraPerms:USERS[u].extraPerms||[] };
   document.getElementById('LS').style.display = 'none';
   document.getElementById('uName').textContent = currentUser.name;
   applyPermissions();
   showNotif('أهلاً ' + currentUser.name + ' 👋');
   setTimeout(()=>{ try{ loadUserData(); }catch(e){} }, 500);
-  if (currentUser.role === 'admin') {
-    document.getElementById('nav-admin').style.display = 'flex';
+  // زر الإدارة: يظهر للمدير أو من لديه صلاحية manage_users
+  const showAdmin = currentUser.role==='admin' || hasExtraPerm('manage_users');
+  document.getElementById('nav-admin').style.display = showAdmin ? 'flex' : 'none';
+  // إدارة المستخدمين للمدير الرئيسي فقط
+  const umSec = document.getElementById('adminUserMgmtSection');
+  if(umSec) umSec.style.display = currentUser.role==='admin' ? 'block' : 'none';
+  if(showAdmin){
     setTimeout(()=>{ try{ loadAdminData(); }catch(e){} }, 800);
   }
 }
 
+function hasExtraPerm(perm){ return currentUser && (currentUser.role==='admin' || (currentUser.extraPerms||[]).includes(perm)); }
+
 function applyPermissions() {
-  // إخفاء/إظهار أزرار التنقل حسب صلاحيات المستخدم
   ALL_PAGES.forEach(pg => {
     const btn = document.getElementById('nav-'+pg.id);
-    if (btn) btn.style.display = currentUser.perms?.includes(pg.id) ? 'flex' : 'none';
+    if (!btn) return;
+    if(pg.id === 'admin'){
+      // زر الإدارة: يظهر للمدير أو من لديه extraPerm manage_users
+      const show = currentUser.role==='admin' || hasExtraPerm('manage_users');
+      btn.style.display = show ? 'flex' : 'none';
+    } else {
+      btn.style.display = currentUser.perms?.includes(pg.id) ? 'flex' : 'none';
+    }
   });
-  // انتقال لأول صفحة مسموح بها
-  const first = ALL_PAGES.find(p => currentUser.perms?.includes(p.id));
+  const first = ALL_PAGES.find(p => {
+    if(p.id==='admin') return currentUser.role==='admin' || hasExtraPerm('manage_users');
+    return currentUser.perms?.includes(p.id);
+  });
   if (first) showPage(first.id);
 }
 
@@ -603,28 +726,112 @@ function logout() {
 
 // ===== الصلاحيات وإدارة المستخدمين =====
 function renderUserMgmt() {
+  const isAdmin = currentUser.role === 'admin';
+  // إدارة المستخدمين والصلاحيات للمستخدم الرئيسي (admin) فقط
+  if(!isAdmin){
+    document.getElementById('adminUserMgmtSection').style.display = 'none';
+    return;
+  }
+  document.getElementById('adminUserMgmtSection').style.display = 'block';
+  const canManageUsers = true;
+
   const cashiers = Object.entries(USERS).filter(([id,u])=>u.role!=='admin');
-  let html = cashiers.map(([id, u]) => {
-    const permBadges = ALL_PAGES.map(pg => {
+  let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'
+    + '<div style="font-size:12px;color:var(--mu)">إجمالي المستخدمين الفرعيين: <b>'+cashiers.length+'</b></div>'
+    + '<button class="btn bp" onclick="openAddUserModal()" style="font-size:12px;padding:6px 14px">➕ إضافة مستخدم</button>'
+    + '</div>';
+
+  html += cashiers.map(([id, u]) => {
+    // --- الصفحات ---
+    const pagesBadges = ALL_PAGES.filter(pg=>pg.id!=='admin').map(pg => {
       const has = (u.perms||[]).includes(pg.id);
-      return `<span class="pb ${has?'on':'off'}" onclick="togglePerm('${id}','${pg.id}',this)">${pg.label}</span>`;
+      return '<span class="pb '+(has?'on':'off')+'" onclick="togglePerm(\''+id+'\',\''+pg.id+'\',this)">'+pg.label+'</span>';
     }).join('');
-    return `<div class="ur" style="flex-wrap:wrap">
-      <div style="min-width:160px">
-        <div class="un">${u.name}</div>
-        <div class="uid">${id} — <span style="color:var(--ok)">كلمة المرور: ${u.pass}</span></div>
-        <div class="perm" style="margin-top:6px">${permBadges}</div>
-      </div>
-      <div style="display:flex;gap:6px;margin-top:6px">
-        <button class="btn bs" onclick="openEditModal('${id}')" style="font-size:11px;padding:5px 10px">✏️ تعديل</button>
-      </div>
-    </div>`;
+
+    // بند لوحة الإدارة منفصل
+    const hasAdmin = (u.extraPerms||[]).includes('manage_users');
+    const adminBadge = isAdmin
+      ? '<span class="pb '+(hasAdmin?'on':'off')+'" onclick="toggleExtraPerm(\''+id+'\',\'manage_users\',this)" style="background:'+(hasAdmin?'#eaf2ff':'#f0f0f0')+';color:'+(hasAdmin?'var(--p)':'#aaa')+';border:1px solid '+(hasAdmin?'var(--p)':'#ddd')+'">⚙️ لوحة الإدارة</span>'
+      : '';
+
+    // --- الصلاحيات الخاصة ---
+    const groups = [...new Set(EXTRA_PERMS.filter(p=>p.id!=='manage_users').map(p=>p.group))];
+    const extraHtml = groups.map(grp => {
+      const items = EXTRA_PERMS.filter(p=>p.group===grp && p.id!=='manage_users').map(ep => {
+        const has = (u.extraPerms||[]).includes(ep.id);
+        return '<span class="pb '+(has?'on':'off')+'" style="margin-bottom:4px" onclick="toggleExtraPerm(\''+id+'\',\''+ep.id+'\',this)">'+ep.label+'</span>';
+      }).join('');
+      return '<div style="margin-top:8px"><div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:4px">'+grp+':</div><div class="perm">'+items+'</div></div>';
+    }).join('');
+
+    return '<div class="ur" style="flex-wrap:wrap;align-items:flex-start;gap:10px">'
+      + '<div style="flex:1;min-width:220px">'
+      + '<div class="un">'+u.name+' <span class="role-u">كاشير</span></div>'
+      + '<div class="uid" style="margin-top:2px">'+id+' — <span style="color:var(--ok);font-weight:700">كلمة المرور: '+u.pass+'</span></div>'
+
+      + '<div style="margin-top:10px;padding:8px;background:#f7f9fc;border-radius:8px;border:1px solid var(--bd)">'
+      + '<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:6px">📄 صفحات التنقل:</div>'
+      + '<div class="perm">'+pagesBadges+'</div>'
+      + (adminBadge ? '<div class="perm" style="margin-top:6px">'+adminBadge+'</div>' : '')
+      + '</div>'
+
+      + '<div style="margin-top:8px;padding:8px;background:#fffbf0;border-radius:8px;border:1px solid var(--a)">'
+      + '<div style="font-size:11px;font-weight:700;color:var(--wn);margin-bottom:2px">🔑 صلاحيات خاصة:</div>'
+      + '<div style="font-size:10px;color:var(--mu);margin-bottom:6px">تمنح إمكانية الاطلاع على بيانات إضافية</div>'
+      + extraHtml
+      + '</div>'
+      + '</div>'
+
+      + '<div style="display:flex;gap:5px;flex-direction:column;align-items:flex-end;padding-top:4px">'
+      + '<button class="btn bs" onclick="openEditModal(\''+id+'\')" style="font-size:11px;padding:5px 10px">✏️ تعديل</button>'
+      + (isAdmin ? '<button class="btn bd2" onclick="deleteUser(\''+id+'\')" style="font-size:11px;padding:5px 10px">🗑️ حذف</button>' : '')
+      + '</div>'
+      + '</div>';
   }).join('');
+
   document.getElementById('userMgmt').innerHTML = html || '<div style="color:var(--mu);text-align:center;padding:16px">لا توجد مستخدمين فرعيين</div>';
+}
+
+// تبديل صلاحية خاصة
+function toggleExtraPerm(userId, permId, el){
+  if(!USERS[userId]) return;
+  // إدارة المستخدمين والصلاحيات للمدير الرئيسي فقط
+  if(currentUser.role !== 'admin'){ showNotif('⛔ إدارة المستخدمين للمدير الرئيسي فقط'); return; }
+  const perms = USERS[userId].extraPerms || [];
+  const idx = perms.indexOf(permId);
+  if(idx >= 0){ perms.splice(idx,1); el.className='pb off'; }
+  else { perms.push(permId); el.className='pb on'; }
+  USERS[userId].extraPerms = perms;
+  // تحديث شريط التنقل إذا كان هو المستخدم الحالي
+  if(currentUser.id === userId){ currentUser.extraPerms = perms; applyPermissions(); }
+  saveUserSettings();
+  showNotif('✅ تم تحديث الصلاحيات');
+}
+
+function deleteUser(uid){
+  if(!USERS[uid]) return;
+  if(currentUser.role !== 'admin'){ showNotif('⛔ إدارة المستخدمين للمدير الرئيسي فقط'); return; }
+  if(!confirm('هل تريد حذف المستخدم "'+USERS[uid].name+'"؟')) return;
+  delete USERS[uid];
+  saveUserSettings();
+  renderUserMgmt();
+  updateLoginSelect();
+  showNotif('تم حذف المستخدم');
+}
+
+function updateLoginSelect(){
+  const sel = document.getElementById('lUser');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— اختر المستخدم —</option>';
+  Object.entries(USERS).forEach(([id,u])=>{
+    sel.innerHTML += '<option value="'+id+'">'+u.name+'</option>';
+  });
+  if(cur && USERS[cur]) sel.value = cur;
 }
 
 function togglePerm(userId, pageId, el) {
   if (!USERS[userId]) return;
+  if(currentUser.role !== 'admin'){ showNotif('⛔ إدارة المستخدمين للمدير الرئيسي فقط'); return; }
   const perms = USERS[userId].perms || [];
   const idx = perms.indexOf(pageId);
   if (idx >= 0) { perms.splice(idx,1); el.className='pb off'; }
@@ -634,57 +841,108 @@ function togglePerm(userId, pageId, el) {
   showNotif('✅ تم تحديث الصلاحيات');
 }
 
+function openAddUserModal(){
+  const uid = 'cashier'+(Date.now()%10000);
+  const pagesHtml = ALL_PAGES.filter(pg=>pg.id!=='admin').map(pg =>
+    '<label style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:13px;cursor:pointer">'
+    + '<input type="checkbox" class="ep-page" value="'+pg.id+'" checked style="width:15px;height:15px">'
+    + pg.label+'</label>'
+  ).join('');
+  const extraHtml = buildExtraPermsCheckboxes([]);
+  document.getElementById('editUserId').value = '__new__:'+uid;
+  document.getElementById('editName').value = '';
+  document.getElementById('editPass').value = '';
+  document.getElementById('editPerms').innerHTML =
+    '<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:7px">📄 صفحات التنقل:</div>'
+    + pagesHtml
+    + '<div style="font-size:11px;font-weight:700;color:var(--wn);margin:12px 0 7px">🔑 صلاحيات خاصة:</div>'
+    + extraHtml;
+  document.querySelector('#editModal h3').textContent = 'إضافة مستخدم جديد';
+  document.getElementById('editModal').classList.add('show');
+}
+
+function buildExtraPermsCheckboxes(currentExtra){
+  const groups = [...new Set(EXTRA_PERMS.map(p=>p.group))];
+  return groups.map(grp => {
+    const items = EXTRA_PERMS.filter(p=>p.group===grp).map(ep => {
+      if(ep.id==='manage_users' && currentUser.role !== 'admin') return '';
+      const has = currentExtra.includes(ep.id);
+      return '<label style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12px;cursor:pointer">'
+        + '<input type="checkbox" class="ep-extra" value="'+ep.id+'" '+(has?'checked':'')+' style="width:15px;height:15px">'
+        + ep.label+'</label>';
+    }).join('');
+    return '<div style="margin-bottom:8px"><div style="font-size:10px;color:var(--mu);font-weight:700;margin-bottom:4px">'+grp+':</div>'+items+'</div>';
+  }).join('');
+}
+
 function openEditModal(userId) {
   const u = USERS[userId];
   if (!u) return;
+  const pagesHtml = ALL_PAGES.filter(pg=>pg.id!=='admin').map(pg => {
+    const has = (u.perms||[]).includes(pg.id);
+    return '<label style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:13px;cursor:pointer">'
+      + '<input type="checkbox" class="ep-page" value="'+pg.id+'" '+(has?'checked':'')+' style="width:15px;height:15px">'
+      + pg.label+'</label>';
+  }).join('');
+  const extraHtml = buildExtraPermsCheckboxes(u.extraPerms||[]);
   document.getElementById('editUserId').value = userId;
   document.getElementById('editName').value = u.name;
   document.getElementById('editPass').value = u.pass;
-  // رسم checkboxes الصلاحيات
-  const permsHtml = ALL_PAGES.map(pg => {
-    const has = (u.perms||[]).includes(pg.id);
-    return `<label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;cursor:pointer">
-      <input type="checkbox" value="${pg.id}" ${has?'checked':''} style="width:16px;height:16px;border-radius:3px">
-      ${pg.label}
-    </label>`;
-  }).join('');
-  document.getElementById('editPerms').innerHTML = permsHtml;
+  document.getElementById('editPerms').innerHTML =
+    '<div style="font-size:11px;font-weight:700;color:var(--p);margin-bottom:7px">📄 صفحات التنقل:</div>'
+    + pagesHtml
+    + '<div style="font-size:11px;font-weight:700;color:var(--wn);margin:12px 0 7px">🔑 صلاحيات خاصة:</div>'
+    + extraHtml;
+  document.querySelector('#editModal h3').textContent = 'تعديل المستخدم';
   document.getElementById('editModal').classList.add('show');
 }
 
 function closeModal() { document.getElementById('editModal').classList.remove('show'); }
 
 function saveUserEdit() {
-  const uid = document.getElementById('editUserId').value;
-  const name = document.getElementById('editName').value.trim();
-  const pass = document.getElementById('editPass').value.trim();
-  const perms = [...document.querySelectorAll('#editPerms input[type=checkbox]:checked')].map(cb=>cb.value);
-  if (!name) { showNotif('⚠️ أدخل الاسم'); return; }
-  if (!pass)  { showNotif('⚠️ أدخل كلمة المرور'); return; }
-  USERS[uid].name = name;
-  USERS[uid].pass = pass;
-  USERS[uid].perms = perms;
+  if(currentUser.role !== 'admin'){ showNotif('⛔ إدارة المستخدمين للمدير الرئيسي فقط'); closeModal(); return; }
+  const rawId = document.getElementById('editUserId').value;
+  const name  = document.getElementById('editName').value.trim();
+  const pass  = document.getElementById('editPass').value.trim();
+  const perms = [...document.querySelectorAll('#editPerms .ep-page:checked')].map(cb=>cb.value);
+  const extra = [...document.querySelectorAll('#editPerms .ep-extra:checked')].map(cb=>cb.value);
+  if (!name) { showNotif('أدخل الاسم'); return; }
+  if (!pass)  { showNotif('أدخل كلمة المرور'); return; }
+
+  if(rawId.startsWith('__new__:')){
+    const uid = rawId.split(':')[1];
+    USERS[uid] = { name, pass, role:'cashier', perms, extraPerms: extra };
+  } else {
+    USERS[rawId].name       = name;
+    USERS[rawId].pass       = pass;
+    USERS[rawId].perms      = perms;
+    USERS[rawId].extraPerms = extra;
+    if(currentUser && currentUser.id === rawId){
+      currentUser.extraPerms = extra;
+      currentUser.perms = perms;
+    }
+  }
   saveUserSettings();
-  populateLoginSelect();
+  updateLoginSelect();
   closeModal();
   renderUserMgmt();
-  showNotif('✅ تم حفظ التعديلات بنجاح');
+  showNotif('✅ تم حفظ التعديلات');
 }
 
-// ===== نظام التخزين Firebase =====
+// ===== نظام التخزين Firebase مع المزامنة الفورية =====
 const _mem = {};
 let _db = null;
 let _fbReady = false;
 
 // ===== إعداد Firebase المدمج =====
 const _FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDO3oyYghTix4fniOFwz1YY2VNnsn9rSQE",
-  authDomain: "alawy-97f25.firebaseapp.com",
-  databaseURL: "https://alawy-97f25-default-rtdb.firebaseio.com",
-  projectId: "alawy-97f25",
-  storageBucket: "alawy-97f25.firebasestorage.app",
-  messagingSenderId: "378978600653",
-  appId: "1:378978600653:web:c11d895ab556d483a34b84"
+  apiKey: "AIzaSyCGZ_k001_6ApYthaZoJC_LMwDvgVRqqwo",
+  authDomain: "arkan-14ded.firebaseapp.com",
+  databaseURL: "https://arkan-14ded-default-rtdb.firebaseio.com",
+  projectId: "arkan-14ded",
+  storageBucket: "arkan-14ded.firebasestorage.app",
+  messagingSenderId: "1060765402857",
+  appId: "1:1060765402857:web:c11d895ab556d483a34b84"
 };
 
 function initFirebase(cfg){
@@ -692,14 +950,39 @@ function initFirebase(cfg){
     if(!firebase.apps.length) firebase.initializeApp(cfg);
     _db = firebase.database();
     _fbReady = true;
+    // مراقبة حالة الاتصال
+    _db.ref('.info/connected').on('value', snap => {
+      const connected = snap.val() === true;
+      setSyncIndicator(connected ? 'connected' : 'offline');
+    });
     console.log('✅ Firebase connected');
     return true;
   } catch(e){ console.error('Firebase init error:', e); return false; }
 }
 
+// تحديث مؤشر المزامنة في الهيدر
+function setSyncIndicator(state){
+  const dot  = document.getElementById('syncLiveDot');
+  const text = document.getElementById('syncLiveText');
+  if(!dot || !text) return;
+  const map = {
+    connected: { color:'#4ade80', label:'متصل 🟢' },
+    saving:    { color:'#fbbf24', label:'جاري الحفظ...' },
+    saved:     { color:'#4ade80', label:'' },
+    offline:   { color:'#f87171', label:'غير متصل' },
+    error:     { color:'#f87171', label:'خطأ في الحفظ' },
+  };
+  const s = map[state] || map.offline;
+  dot.style.background  = s.color;
+  text.style.color      = s.color;
+  text.textContent      = s.label;
+  // إخفاء النص بعد 3 ثوانٍ إن كان "saved"
+  if(state === 'saved') setTimeout(()=>{ if(text.textContent==='') return; text.textContent=''; }, 3000);
+}
+
 // تهيئة تلقائية فورية
 (function(){
-  try { initFirebase(_FIREBASE_CONFIG); } catch(e){ console.warn('Firebase auto-init failed:', e); }
+  try { initFirebase(_FIREBASE_CONFIG); } catch(e){ console.warn('Firebase auto-init failed:', e); setSyncIndicator('offline'); }
 })();
 
 function _fbKey(k){ return k.replace(/[.#$\[\]]/g,'_'); }
@@ -727,12 +1010,13 @@ async function loadData(k, sh=false){
   return _mem[k]||null;
 }
 
-// مراقبة التغييرات الفورية (للمدير)
+// ===== مراقبة التغييرات الفورية =====
 let _listeners = {};
 function watchData(k, cb){
   if(!_fbReady || !_db) return;
   const key = 'arkan/' + _fbKey(k);
   if(_listeners[key]) _db.ref(key).off('value', _listeners[key]);
+  // نستخدم on('value') للتحديث الفوري
   const fn = _db.ref(key).on('value', snap => { if(snap.exists()) cb(snap.val()); });
   _listeners[key] = fn;
 }
@@ -742,11 +1026,21 @@ function unwatchData(k){
   if(_listeners[key]){ _db.ref(key).off('value', _listeners[key]); delete _listeners[key]; }
 }
 
+// ===== المزامنة الفورية لبيانات المستخدم الحالي =====
+// يستمع لتغييرات بياناته الخاصة من مستخدمين آخرين (نادر لكن يضمن التزامن)
+let _selfWatched = false;
+function startSelfWatch(){
+  if(!currentUser || _selfWatched || !_fbReady || !_db) return;
+  _selfWatched = true;
+  // لا نحتاج لمزامنة بياناتنا — فقط نحفظها
+}
+
 // ===== الحفظ التلقائي الفوري =====
 let saveTimer=null;
 let _lastSaved = 0;
 function autoSave(){
   clearTimeout(saveTimer);
+  setSyncIndicator('saving');
   saveTimer=setTimeout(()=>{ if(currentUser) saveCurrentUserData(); }, 400);
 }
 
@@ -759,9 +1053,10 @@ async function saveCurrentUserData(){
   data.user    = currentUser.id;
   data.date    = TODAY;
   const ok = await saveData(`cb:${TODAY}:${currentUser.id}`, data, true);
-  // تحديث مؤشر الحفظ في الهيدر
-  const si = document.getElementById('saveIndicator');
-  if(si) { si.textContent = ok ? '✅ محفوظ '+data.savedAt : '⚠️ خطأ'; si.style.color = ok?'#9fe1cb':'#f5c2be'; }
+  setSyncIndicator(ok ? 'saved' : 'error');
+  // تحديث مؤشر الوقت إن نجح الحفظ
+  const text = document.getElementById('syncLiveText');
+  if(ok && text) { text.textContent = '✅ ' + data.savedAt; setTimeout(()=>{ if(text) text.textContent=''; },4000); }
 }
 
 async function loadUserData(){
@@ -1012,10 +1307,16 @@ function buildShiftSectionForAdmin(denomData, sys, inv, diff, status){
 
 async function loadAdminData(){
   const dot=document.getElementById('syncDot'), status=document.getElementById('syncStatus');
-  if(dot){ dot.style.background='#e8b84b'; dot.style.animation='pulse 0.8s infinite'; }
+  if(dot){ dot.style.background='#fbbf24'; }
   if(status) status.textContent='جاري التحديث...';
 
-  const cashiers=Object.entries(USERS).filter(([id,u])=>u.role!=='admin');
+  // تحديد ما يُعرض حسب صلاحيات المستخدم الحالي
+  const isAdmin      = currentUser.role === 'admin';
+  const canViewInv   = isAdmin || hasExtraPerm('view_other_inventory');
+  const canViewShift = isAdmin || hasExtraPerm('view_other_shifts');
+  // المستخدمون الآخرون فقط (لا أنا)
+  const cashiers = Object.entries(USERS).filter(([id,u])=> u.role!=='admin' && id !== currentUser.id);
+
   let html='',allData={},hasAny=false;
 
   for(const[uid,u]of cashiers){
@@ -1136,7 +1437,7 @@ async function loadAdminData(){
     const morDiff = morInv - morSys;
     const morStatus = Math.abs(morDiff)<.005 ? {lbl:'✓ مطابق',bg:'var(--ok)',cls:'match'} : (morDiff>0 ? {lbl:'⬆ زيادة',bg:'var(--wn)',cls:'surplus'} : {lbl:'⬇ عجز',bg:'var(--er)',cls:'deficit'});
     const morShiftContent = buildShiftSectionForAdmin(data.morD, morSys, morInv, morDiff, morStatus);
-    const morSection = detailSection('🌅', 'إقفال الفترة الصباحية', morShiftContent, '#fff8e8');
+    const morSection = canViewShift ? detailSection('🌅', 'إقفال الفترة الصباحية', morShiftContent, '#fff8e8') : '';
 
     // === إقفال المساء ===
     const eveInv = calcShiftTotalFromData(data.eveD);
@@ -1144,7 +1445,7 @@ async function loadAdminData(){
     const eveDiff = eveInv - eveSys;
     const eveStatus = Math.abs(eveDiff)<.005 ? {lbl:'✓ مطابق',bg:'var(--ok)',cls:'match'} : (eveDiff>0 ? {lbl:'⬆ زيادة',bg:'var(--wn)',cls:'surplus'} : {lbl:'⬇ عجز',bg:'var(--er)',cls:'deficit'});
     const eveShiftContent = buildShiftSectionForAdmin(data.eveD, eveSys, eveInv, eveDiff, eveStatus);
-    const eveSection = detailSection('🌙', 'إقفال الفترة المسائية', eveShiftContent, '#f0f0ff');
+    const eveSection = canViewShift ? detailSection('🌙', 'إقفال الفترة المسائية', eveShiftContent, '#f0f0ff') : '';
 
     html+=`<div style="background:#fff;border:1.5px solid var(--bd);border-radius:14px;padding:14px 16px;margin-bottom:16px;box-shadow:var(--sh)">
       <!-- رأس الموظف -->
@@ -1153,29 +1454,29 @@ async function loadAdminData(){
           <div style="font-weight:800;color:var(--p);font-size:15px">👤 ${u.name}</div>
           <div style="font-size:11px;color:var(--mu);margin-top:2px">آخر تحديث: ${data.savedAt||'—'}</div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-          <span style="background:${dtBg};color:#fff;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700">${dt}${Math.abs(diff)<.005?'':' — '+fmt(Math.abs(diff))+' ر.س'}</span>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          ${isAdmin ? `<span style="background:${dtBg};color:#fff;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700">${dt}${Math.abs(diff)<.005?'':' — '+fmt(Math.abs(diff))+' ر.س'}</span>` : ''}
+          ${isAdmin ? `<button class="btn bs" onclick="viewUserReport('${uid}')" style="font-size:11px;padding:4px 10px">📋 عرض التقرير الكامل</button>` : ''}
         </div>
       </div>
-      ${summaryCards}
-      ${invSection}
-      ${salesSection}
-      ${retSection}
-      ${expSection}
-      ${depSection}
-      ${recSection}
+      ${isAdmin ? summaryCards : ''}
+      ${canViewInv ? invSection : ''}
+      ${isAdmin ? salesSection : ''}
+      ${isAdmin ? retSection : ''}
+      ${isAdmin ? expSection : ''}
+      ${isAdmin ? depSection : ''}
+      ${isAdmin ? recSection : ''}
       ${morSection}
       ${eveSection}
     </div>`;
   }
 
   document.getElementById('adminDataView').innerHTML=html||'<div style="text-align:center;color:var(--mu);padding:20px">لا توجد بيانات اليوم</div>';
-  const now2=new Date().toLocaleTimeString('ar-SA');
-  if(dot){dot.style.background=hasAny?'var(--ok)':'#ccc';dot.style.animation='none';}
-  if(status) status.textContent=hasAny?'متصل':'لا توجد بيانات';
-  const lrt=document.getElementById('lastRefreshTime'); if(lrt) lrt.textContent='⏱ آخر تحديث: '+now2+' (يتحدث تلقائياً)';
+  _updateAdminSyncStatus(_fbReady);
+  // تحديث الجدول المقارن أيضاً
 
-  // جدول المقارنة المختصر
+  // جدول المقارنة المختصر (للمدير فقط)
+  if(!isAdmin){ const ac=document.getElementById('adminCompare'); if(ac) ac.innerHTML=''; return; }
   const rows=Object.entries(allData).map(([uid,data])=>{
     const u=USERS[uid];
     if(!data)return`<tr><td style="font-weight:600">${u.name}</td><td colspan="5" style="text-align:center;color:var(--mu)">لا توجد بيانات</td></tr>`;
@@ -1197,16 +1498,68 @@ async function loadAdminData(){
   </table>`:'<div style="text-align:center;color:var(--mu);padding:16px">لا توجد بيانات</div>';
 }
 
-// ===== التنقل =====
+// ===== رسم صفحة الإدارة حسب الصلاحيات =====
+function renderAdminPage(){
+  const isAdmin = currentUser.role === 'admin';
+  const canManageUsers = isAdmin || hasExtraPerm('manage_users');
+  const canViewData    = isAdmin || hasExtraPerm('view_other_inventory') || hasExtraPerm('view_other_shifts');
+
+  // قسم البيانات
+  document.getElementById('adminDataSection').style.display = canViewData ? 'block' : 'none';
+  // قسم إدارة المستخدمين
+  document.getElementById('adminUserMgmtSection').style.display = canManageUsers ? 'block' : 'none';
+  // قسم الجدول المقارن
+  document.getElementById('adminCompareSection').style.display = canViewData ? 'block' : 'none';
+  // قسم التحديثات — للمدير الرئيسي فقط
+  const updSec = document.getElementById('adminUpdateSection');
+  if(updSec) updSec.style.display = isAdmin ? 'block' : 'none';
+
+  if(canViewData){
+    try{loadAdminData();}catch(e){}
+    try{startAdminRefresh();}catch(e){}
+  }
+  if(canManageUsers){
+    try{renderUserMgmt();}catch(e){}
+  }
+  // تحميل رابط التحديث المحفوظ
+  if(isAdmin) try{ loadUpdateUrl(); }catch(e){}
+}
+
+// تطبيق قيود عرض التقرير النهائي
+function applyReportViewRestriction(){
+  if(currentUser.role === 'admin' || hasExtraPerm('view_report_full')) return;
+  // ملخص فقط — إخفاء تفاصيل المعادلة والمقارنة الكاملة
+  const detailCard = document.querySelector('#page-report .card:nth-child(3)');
+  if(detailCard) detailCard.style.opacity = hasExtraPerm('view_report_summary') ? '1' : '0.3';
+}
 function showPage(id){
   const pg = document.getElementById('page-'+id);
   if(!pg) return;
+  // تحقق من صلاحية الوصول
+  if(currentUser){
+    if(id === 'admin'){
+      if(currentUser.role !== 'admin' && !hasExtraPerm('manage_users')){
+        showNotif('⛔ ليس لديك صلاحية لوحة الإدارة');
+        return;
+      }
+    } else if(id === 'report'){
+      if(currentUser.role !== 'admin'
+        && !hasExtraPerm('view_report_full')
+        && !hasExtraPerm('view_report_summary')){
+        showNotif('⛔ ليس لديك صلاحية للتقرير النهائي');
+        return;
+      }
+    } else if(!currentUser.perms?.includes(id) && currentUser.role !== 'admin'){
+      showNotif('⛔ ليس لديك صلاحية للوصول لهذه الصفحة');
+      return;
+    }
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   pg.classList.add('active');
   const btn=document.getElementById('nav-'+id); if(btn) btn.classList.add('active');
-  if(id==='report') try{calcReport();}catch(e){}
-  if(id==='admin'){ try{renderUserMgmt();}catch(e){} try{loadAdminData();}catch(e){} try{startAdminRefresh();}catch(e){} }
+  if(id==='report') try{calcReport(); applyReportViewRestriction();}catch(e){}
+  if(id==='admin'){ try{renderAdminPage();}catch(e){} }
   else try{stopAdminRefresh();}catch(e){}
 }
 
@@ -1246,20 +1599,44 @@ function calcInventory(){
   renderReport();
 }
 
-// ===== مراقبة فورية للمدير عبر Firebase =====
+// ===== المزامنة الفورية للمدير عبر Firebase =====
 let adminRefreshTimer = null;
+let _adminWatchedKeys = [];
+
 function startAdminRefresh(){
   stopAdminRefresh();
   if(_fbReady && _db){
-    // مراقبة فورية عبر Firebase
+    // مراقبة فورية عبر Firebase Realtime
     const cashiers = Object.keys(USERS).filter(id => USERS[id].role !== 'admin');
+    _adminWatchedKeys = cashiers.map(uid => `cb:${TODAY}:${uid}`);
+    let _debounce = null;
     cashiers.forEach(uid => {
-      watchData('cb:'+TODAY+':'+uid, ()=>{
-        if(currentUser?.role==='admin' && document.getElementById('page-admin')?.classList.contains('active')){
-          loadAdminData();
+      watchData('cb:'+TODAY+':'+uid, (newData)=>{
+        // تحديث فوري بمجرد تغيير أي بيانات
+        if(currentUser && document.getElementById('page-admin')?.classList.contains('active')){
+          clearTimeout(_debounce);
+          _debounce = setTimeout(()=>{
+            try{ loadAdminData(); } catch(e){}
+          }, 300);
         }
       });
     });
+    // مراقبة إضافة مستخدمين جدد
+    _db.ref(`arkan/arkan_users_config`).on('value', snap => {
+      if(!snap.exists()) return;
+      const saved = snap.val();
+      if(saved && typeof saved === 'object'){
+        const merged = Object.assign({}, USERS);
+        Object.entries(saved).forEach(([id,u])=>{ if(id !== 'admin') merged[id] = u; });
+        Object.assign(USERS, merged);
+        updateLoginSelect();
+        if(currentUser && document.getElementById('page-admin')?.classList.contains('active')){
+          try{ renderUserMgmt(); } catch(e){}
+        }
+      }
+    });
+    // تحديث مؤشر الإدارة
+    _updateAdminSyncStatus(true);
     console.log('🔴 Live watching Firebase for', cashiers.length, 'cashiers');
   } else {
     // fallback: polling كل 5 ثوانٍ
@@ -1268,12 +1645,30 @@ function startAdminRefresh(){
         loadAdminData();
       }
     }, 5000);
+    _updateAdminSyncStatus(false);
   }
 }
+
 function stopAdminRefresh(){
   clearInterval(adminRefreshTimer);
+  adminRefreshTimer = null;
   const cashiers = Object.keys(USERS).filter(id => USERS[id].role !== 'admin');
   cashiers.forEach(uid => unwatchData('cb:'+TODAY+':'+uid));
+  if(_fbReady && _db) try{ _db.ref(`arkan/arkan_users_config`).off('value'); }catch(e){}
+  _adminWatchedKeys = [];
+}
+
+function _updateAdminSyncStatus(isLive){
+  const dot    = document.getElementById('syncDot');
+  const status = document.getElementById('syncStatus');
+  if(dot){
+    dot.style.background  = isLive ? '#4ade80' : '#fbbf24';
+    dot.style.animation   = isLive ? 'pulse 2s infinite' : 'none';
+  }
+  if(status) status.textContent = isLive ? '🟢 مزامنة فورية' : '🟡 تحديث دوري';
+  // تحديث وقت آخر تحديث
+  const lt = document.getElementById('lastRefreshTime');
+  if(lt) lt.textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-SA');
 }
 
 // ===== المبيعات =====
@@ -1452,39 +1847,37 @@ function printShift(shift){
   const rc=Math.abs(diff)<.005?'#1a7a4a':(diff>0?'#b57a00':'#b52a2a');
   const rb=Math.abs(diff)<.005?'#e6f7ee':(diff>0?'#fff8e1':'#fdecea');
   const rt=Math.abs(diff)<.005?'✓ مطابق':(diff>0?'⬆ يوجد زيادة':'⬇ يوجد عجز');
-  const ra=Math.abs(diff)<.005?'—':fmt(Math.abs(diff))+' ر.س';
-  let invRows='';SHIFT_DENOMS.forEach((d,i)=>{const c=parseFloat((document.getElementById(p+'cnt'+i)||{}).value||0)||0;invRows+=`<tr><td style="text-align:center">${i+1}</td><td style="text-align:center;font-weight:700">${d}</td><td style="text-align:center">${c}</td><td style="text-align:center;font-weight:700;background:#eaf2ff">${fmt(c*d)}</td></tr>`;});
+  const fmtEn=v=>(Math.round(v*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const ra=Math.abs(diff)<.005?'—':fmtEn(Math.abs(diff))+' ر.س';
+  let invRows='';SHIFT_DENOMS.forEach((d,i)=>{const c=parseFloat((document.getElementById(p+'cnt'+i)||{}).value||0)||0;invRows+=`<tr><td style="text-align:center;font-size:18px;font-weight:800">${i+1}</td><td style="text-align:center;font-size:18px;font-weight:800">${d}</td><td style="text-align:center;font-size:18px;font-weight:800">${c}</td><td style="text-align:center;font-size:18px;font-weight:800;background:#eaf2ff">${fmtEn(c*d)}</td></tr>`;});
   const sr=Math.abs(diff)>=.005&&diff>0?`<tr style="background:#fff8e1"><td colspan="3" style="text-align:center;font-weight:700;color:#b57a00">الزيادة</td><td style="text-align:center;font-weight:800;color:#b57a00">${fmt(diff)}</td></tr>`:'';
   const db=Math.abs(diff)<.005?'#e6f7ee':'#fdecea',dc=Math.abs(diff)<.005?'#1a7a4a':'#b52a2a';
   const da=Math.abs(diff)<.005?fmt(0):(diff<0?fmt(Math.abs(diff)):fmt(0));
   const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet"><title>${title}</title>
-<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Tajawal',sans-serif;direction:rtl;padding:16px;font-size:12px}
-.h{text-align:center;border-bottom:3px solid #1a3a5c;padding-bottom:10px;margin-bottom:14px}.h h1{font-size:17px;font-weight:800;color:#1a3a5c}.h h2{font-size:13px;font-weight:700;color:#c8972a;margin-top:3px}.h p{font-size:10px;color:#888;margin-top:2px}
-.s{border:1px solid #d4dde8;border-radius:6px;padding:9px 11px;margin-bottom:10px}
-.st{font-size:11px;font-weight:700;color:#1a3a5c;padding-bottom:5px;margin-bottom:7px;border-bottom:1px solid #eef2f7}
-table{width:100%;border-collapse:collapse;font-size:11px}th{background:#1a3a5c;color:#fff;padding:5px 7px;text-align:right;font-size:10px}td{padding:4px 7px;border-bottom:1px solid #eef2f7}
-.cg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}.cb{border-radius:7px;padding:12px;text-align:center}.cb .l{font-size:10px;font-weight:700;margin-bottom:4px}.cb .v{font-size:18px;font-weight:800}.cb .s{font-size:9px;color:#888;margin-top:2px}
-.rf{border-radius:7px;padding:12px;text-align:center;border:2px solid ${rc};background:${rb}}.rf .t{font-size:15px;font-weight:800;color:${rc}}.rf .a{font-size:20px;font-weight:800;color:${rc};margin-top:5px}
-.fo{margin-top:12px;padding-top:8px;border-top:1px solid #d4dde8;text-align:center;font-size:9px;color:#888}
-@media print{@page{size:A4;margin:12mm 10mm}body{padding:0}}</style></head><body>
+  w.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet"><title>${title}</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Tajawal',sans-serif;direction:rtl;padding:14px 16px;font-size:14px;color:#1a2533}
+.h{text-align:center;border-bottom:3px solid #1a3a5c;padding-bottom:10px;margin-bottom:14px}.h h1{font-size:20px;font-weight:900;color:#1a3a5c}.h h2{font-size:16px;font-weight:700;color:#c8972a;margin-top:4px}.h p{font-size:12px;color:#888;margin-top:3px}
+.s{border:1px solid #d4dde8;border-radius:7px;padding:11px 14px;margin-bottom:10px}
+.st{font-size:15px;font-weight:700;color:#1a3a5c;padding-bottom:6px;margin-bottom:8px;border-bottom:2px solid #eef2f7}
+table{width:100%;border-collapse:collapse;font-size:14px}th{background:#1a3a5c;color:#fff;padding:8px 12px;text-align:right;font-size:14px;font-family:'Tajawal',sans-serif}td{padding:7px 12px;border-bottom:1px solid #eef2f7;font-size:14px}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}.cb{border-radius:8px;padding:12px;text-align:center}.cb .l{font-size:13px;font-weight:700;margin-bottom:5px}.cb .v{font-size:20px;font-weight:900}.cb .s{font-size:11px;color:#888;margin-top:3px}
+.rf{border-radius:8px;padding:12px;text-align:center;border:2px solid ${rc};background:${rb}}.rf .t{font-size:16px;font-weight:800;color:${rc}}.rf .a{font-size:22px;font-weight:900;color:${rc};margin-top:6px}
+.fo{margin-top:10px;padding-top:7px;border-top:1px solid #d4dde8;text-align:center;font-size:11px;color:#aaa}
+@media print{@page{size:A4;margin:10mm 10mm}body{padding:0}}</style></head><body>
 <div class="h"><h1>شركة أركان لمنيف التجارية</h1><h2>${title}</h2><p>س.ت 5950028336 | ${dateStr}</p></div>
 <div class="s"><div class="st">📦 جرد الصندوق</div>
-<table><thead><tr><th style="width:30px;text-align:center">م</th><th style="text-align:center">الفئة</th><th style="text-align:center;width:60px">العدد</th><th style="text-align:center;width:80px">الإجمالي</th></tr></thead>
+<table><thead><tr><th style="width:40px;text-align:center">م</th><th style="text-align:center">الفئة</th><th style="text-align:center;width:80px">العدد</th><th style="text-align:center;width:110px">الإجمالي</th></tr></thead>
 <tbody>${invRows}</tbody>
 <tfoot>
-<tr style="background:#eaf2ff"><td colspan="3" style="text-align:center;font-weight:700;color:#1a3a5c">الإجمالي</td><td style="text-align:center;font-size:13px;font-weight:800">${fmt(inv)}</td></tr>
-<tr style="background:#f0fff4"><td colspan="3" style="text-align:center;font-weight:700;color:#1a7a4a">الرصيد الدفتري</td><td style="text-align:center;font-size:13px;font-weight:800;color:#1a7a4a">${fmt(sys)}</td></tr>
-${sr}
-<tr style="background:${db}"><td colspan="3" style="text-align:center;font-weight:700;color:${dc}">النقص</td><td style="text-align:center;font-weight:800;color:${dc}">${da}</td></tr>
+<tr style="background:#eaf2ff"><td colspan="3" style="text-align:center;font-weight:700;color:#1a3a5c;font-size:14px">الإجمالي</td><td style="text-align:center;font-size:18px;font-weight:900;color:#1a3a5c">${fmtEn(inv)}</td></tr>
 </tfoot></table></div>
-<div class="s" style="border:2px solid #1a3a5c"><div class="st" style="font-size:12px">⚖️ نتيجة المقارنة</div>
+<div class="s" style="border:2px solid #1a3a5c"><div class="st" style="font-size:15px">⚖️ نتيجة المقارنة</div>
 <div class="cg">
-<div class="cb" style="background:#eaf2ff"><div class="l" style="color:#1a3a5c">🏦 رصيد الخزينة</div><div class="v" style="color:#1a3a5c">${fmt(inv)} ر.س</div><div class="s">من جرد الصندوق</div></div>
-<div class="cb" style="background:#f0fff4"><div class="l" style="color:#1a7a4a">📊 رصيد النظام</div><div class="v" style="color:#1a7a4a">${fmt(sys)} ر.س</div><div class="s">من النظام المحاسبي</div></div>
+<div class="cb" style="background:#eaf2ff"><div class="l" style="color:#1a3a5c">🏦 رصيد الخزينة</div><div class="v" style="color:#1a3a5c">${fmtEn(inv)} ر.س</div><div class="s">من جرد الصندوق</div></div>
+<div class="cb" style="background:#f0fff4"><div class="l" style="color:#1a7a4a">📊 رصيد النظام</div><div class="v" style="color:#1a7a4a">${fmtEn(sys)} ر.س</div><div class="s">من النظام المحاسبي</div></div>
 </div>
 <div class="rf"><div class="t">${rt}</div><div class="a">${ra}</div></div></div>
-<div class="fo">إقفال الصندوق | شركة أركان لمنيف التجارية</div>
+<div class="fo">إقفال الصندوق | شركة أركان لمنيف التجارية — تطوير: علوي الحذيفي 0551156419</div>
 <script>window.onload=()=>{setTimeout(()=>window.print(),400)}<\/script></body></html>`);w.document.close();
 }
 
@@ -1510,7 +1903,7 @@ function printInventory(){
   <div class="h"><h1>شركة أركان لمنيف التجارية</h1><h2>📦 جرد الصندوق</h2><p>س.ت 5950028336 | ${ds}</p></div>
   <table><thead><tr><th style="width:30px;text-align:center">م</th><th style="text-align:center">الفئة</th><th style="text-align:center;width:60px">العدد</th><th style="text-align:center;width:80px">الإجمالي</th></tr></thead><tbody>${rows}</tbody>
   <tfoot><tr style="background:#eaf2ff"><td colspan="3" style="text-align:center;font-weight:700;color:#1a3a5c">الإجمالي</td><td style="text-align:center;font-size:14px;font-weight:800">${fmt(total)}</td></tr></tfoot></table>
-  <div class="fo">جرد الصندوق | شركة أركان لمنيف التجارية</div>
+  <div class="fo">جرد الصندوق | شركة أركان لمنيف التجارية — تطوير: علوي الحذيفي 0551156419</div>
   <script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`);
   w.document.close();
 }
@@ -1527,7 +1920,168 @@ function printSales(){
   <div style="border:1px solid #d4dde8;border-radius:6px;padding:9px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;padding:4px 0"><span style="font-weight:700">إجمالي المبيعات</span><span style="font-weight:800;color:#1a3a5c">${fmt(S.salesTotal)} ر.س</span></div>${S.salesDisc?`<div style="display:flex;justify-content:space-between;padding:4px 0"><span>خصميات</span><span style="color:#b52a2a">− ${fmt(S.salesDisc)} ر.س</span></div>`:''}</div>
   ${tbl('مبيعات آجل',crR,S.credit)}${tbl('شيكات',netR,S.network)}${tbl('تحويلات',trR,S.transfer)}${tbl('متعلقات',othR,S.salesOther)}
   <div class="net"><span style="color:#fff;font-weight:700">صافي المبيعات النقدية</span><span style="color:#e8b84b;font-size:15px;font-weight:800">${fmt(S.salesNet)} ر.س</span></div>
-  <div class="fo">تقرير المبيعات | شركة أركان لمنيف التجارية</div>
+  <div class="fo">تقرير المبيعات | شركة أركان لمنيف التجارية — تطوير: علوي الحذيفي 0551156419</div>
+  <script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`);
+  w.document.close();
+}
+
+// ===== عرض وطباعة تقرير مستخدم محدد (للمدير) =====
+let _currentViewedUser = null;
+let _currentViewedData = null;
+
+async function viewUserReport(uid){
+  const u = USERS[uid];
+  const data = await loadData('cb:'+TODAY+':'+uid, true);
+  _currentViewedUser = uid;
+  _currentViewedData = data;
+
+  const sec = document.getElementById('userReportSection');
+  const title = document.getElementById('userReportTitle');
+  const content = document.getElementById('userReportContent');
+  title.textContent = '📋 تقرير المستخدم: ' + (u?u.name:uid);
+
+  if(!data){
+    content.innerHTML = '<div style="text-align:center;color:var(--mu);padding:20px">لم يُدخل هذا المستخدم بيانات اليوم بعد</div>';
+    sec.style.display = 'block';
+    sec.scrollIntoView({behavior:'smooth'});
+    return;
+  }
+
+  const sn=data.salesNet||0, ret=data.returnsNet||0, exp=data.expTotal||0;
+  const dep=data.depositTotal||0, rec=data.recTotal||0, inv=data.invTotal||0, op=data.opening||0;
+  const net=op+sn-ret-exp-dep+rec;
+  const diff=inv-net;
+  const dc=Math.abs(diff)<.005?'var(--ok)':(diff>0?'var(--wn)':'var(--er)');
+  const dt=Math.abs(diff)<.005?'✓ مطابق':(diff>0?'⬆ زيادة':'⬇ عجز');
+
+  const creditTotal  = (data.credit||[]).reduce((a,r)=>a+(r.v||0),0);
+  const networkTotal = (data.network||[]).reduce((a,r)=>a+(r.v||0),0);
+  const transferTotal= (data.transfer||[]).reduce((a,r)=>a+(r.v||0),0);
+  const salesOtherTotal=(data.salesOther||[]).reduce((a,r)=>a+(r.v||0),0);
+  const custodyTotal = (data.custody||[]).reduce((a,r)=>a+(r.v||0),0);
+  const expSubTotal  = (data.exp||[]).reduce((a,r)=>a+(r.v||0),0);
+  const advTotal     = (data.adv||[]).reduce((a,r)=>a+(r.v||0),0);
+  const recFactTotal = (data.recFact||[]).reduce((a,r)=>a+(r.v||0),0);
+  const recWorkTotal = (data.recWork||[]).reduce((a,r)=>a+(r.v||0),0);
+  const recOtherTotal= (data.recOther||[]).reduce((a,r)=>a+(r.v||0),0);
+  const retSalesTotal= (data.retSales||[]).reduce((a,r)=>a+(r.v||0),0);
+  const retOtherTotal= (data.retOther||[]).reduce((a,r)=>a+(r.v||0),0);
+
+  content.innerHTML = `
+  <div style="background:#f0f7ff;border-radius:10px;padding:12px 14px;margin-bottom:12px;border:1.5px solid var(--pl)">
+    <div style="font-size:13px;font-weight:700;color:var(--p);margin-bottom:6px">ملخص اليوم</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;font-size:12px">
+      <div style="background:#fff;border-radius:7px;padding:7px;text-align:center;border:1px solid var(--bd)"><div style="color:var(--mu);font-size:10px">رصيد أول المدة</div><div style="font-weight:700;color:var(--p)">${fmt(op)}</div></div>
+      <div style="background:#fff;border-radius:7px;padding:7px;text-align:center;border:1px solid var(--bd)"><div style="color:var(--mu);font-size:10px">إجمالي المبيعات</div><div style="font-weight:700;color:var(--ok)">${fmt(data.salesTotal||0)}</div></div>
+      <div style="background:#fff;border-radius:7px;padding:7px;text-align:center;border:1px solid var(--bd)"><div style="color:var(--mu);font-size:10px">صافي المبيعات</div><div style="font-weight:700;color:var(--ok)">${fmt(sn)}</div></div>
+      <div style="background:#fff;border-radius:7px;padding:7px;text-align:center;border:1px solid var(--bd)"><div style="color:var(--mu);font-size:10px">المردودات</div><div style="font-weight:700;color:var(--er)">${fmt(ret)}</div></div>
+      <div style="background:#fff;border-radius:7px;padding:7px;text-align:center;border:1px solid var(--bd)"><div style="color:var(--mu);font-size:10px">الخرجيات</div><div style="font-weight:700;color:var(--wn)">${fmt(exp)}</div></div>
+      <div style="background:#fff;border-radius:7px;padding:7px;text-align:center;border:1px solid var(--bd)"><div style="color:var(--mu);font-size:10px">الإيداعات</div><div style="font-weight:700;color:var(--p)">${fmt(dep)}</div></div>
+      <div style="background:#fff;border-radius:7px;padding:7px;text-align:center;border:1px solid var(--bd)"><div style="color:var(--mu);font-size:10px">المقبوضات</div><div style="font-weight:700;color:var(--ok)">${fmt(rec)}</div></div>
+      <div style="background:#fff;border-radius:7px;padding:7px;text-align:center;border:1px solid var(--bd)"><div style="color:var(--mu);font-size:10px">جرد الخزينة</div><div style="font-weight:700;color:var(--p)">${fmt(inv)}</div></div>
+      <div style="background:${Math.abs(diff)<.005?'#e6f7ee':'#fdecea'};border-radius:7px;padding:7px;text-align:center;border:1px solid ${dc}"><div style="color:var(--mu);font-size:10px">الفرق</div><div style="font-weight:700;color:${dc}">${dt}</div></div>
+    </div>
+  </div>
+  ${creditTotal||networkTotal||transferTotal||salesOtherTotal||data.salesDisc ? `
+  <div style="border:1px solid var(--bd);border-radius:9px;padding:12px;margin-bottom:10px">
+    <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:8px">💰 تفاصيل المبيعات</div>
+    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bg)"><span>إجمالي المبيعات</span><b>${fmt(data.salesTotal||0)} ر.س</b></div>
+    ${data.salesDisc?'<div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--er)"><span>خصميات</span><span>− '+fmt(data.salesDisc)+' ر.س</span></div>':''}
+    ${creditTotal?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>مبيعات آجل</span><b>'+fmt(creditTotal)+' ر.س</b></div>'+buildDetailTable(data.credit):''}
+    ${networkTotal?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>شيكات</span><b>'+fmt(networkTotal)+' ر.س</b></div>'+buildDetailTable(data.network):''}
+    ${transferTotal?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>تحويلات</span><b>'+fmt(transferTotal)+' ر.س</b></div>'+buildDetailTable(data.transfer):''}
+    ${salesOtherTotal?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>متعلقات</span><b>'+fmt(salesOtherTotal)+' ر.س</b></div>'+buildDetailTable(data.salesOther):''}
+    <div style="background:var(--p);border-radius:7px;padding:7px 10px;display:flex;justify-content:space-between;margin-top:8px"><span style="color:#fff;font-weight:700">صافي المبيعات النقدية</span><span style="color:var(--al);font-weight:800">${fmt(sn)} ر.س</span></div>
+  </div>`:'' }
+  ${retSalesTotal||retOtherTotal ? `
+  <div style="border:1px solid var(--bd);border-radius:9px;padding:12px;margin-bottom:10px">
+    <div style="font-size:12px;font-weight:700;color:var(--er);margin-bottom:8px">↩️ تفاصيل المردودات</div>
+    ${retSalesTotal?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>مردود المبيعات</span><b>'+fmt(retSalesTotal)+' ر.س</b></div>'+buildDetailTable(data.retSales):''}
+    ${retOtherTotal?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>متعلقات المردود</span><b>'+fmt(retOtherTotal)+' ر.س</b></div>'+buildDetailTable(data.retOther):''}
+    <div style="background:#b52a2a;border-radius:7px;padding:7px 10px;display:flex;justify-content:space-between;margin-top:8px"><span style="color:#fff;font-weight:700">صافي المردودات</span><span style="color:#ffd0d0;font-weight:800">${fmt(ret)} ر.س</span></div>
+  </div>`:'' }
+  ${custodyTotal||expSubTotal||advTotal ? `
+  <div style="border:1px solid var(--bd);border-radius:9px;padding:12px;margin-bottom:10px">
+    <div style="font-size:12px;font-weight:700;color:var(--wn);margin-bottom:8px">📤 تفاصيل الخرجيات</div>
+    ${custodyTotal?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>💼 العهد</span><b>'+fmt(custodyTotal)+' ر.س</b></div>'+buildDetailTable(data.custody):''}
+    ${expSubTotal?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>📋 الخرجيات</span><b>'+fmt(expSubTotal)+' ر.س</b></div>'+buildDetailTable(data.exp):''}
+    ${advTotal?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>💳 السلف</span><b>'+fmt(advTotal)+' ر.س</b></div>'+buildDetailTable(data.adv):''}
+    <div style="background:#b57a00;border-radius:7px;padding:7px 10px;display:flex;justify-content:space-between;margin-top:8px"><span style="color:#fff;font-weight:700">إجمالي الخرجيات</span><span style="color:#fff3cd;font-weight:800">${fmt(exp)} ر.س</span></div>
+  </div>`:'' }
+  ${dep ? `
+  <div style="border:1px solid var(--bd);border-radius:9px;padding:12px;margin-bottom:10px">
+    <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:8px">🏧 الإيداعات</div>
+    ${buildDetailTable(data.deposit,'لا توجد إيداعات')}
+    <div style="background:#1a5c3a;border-radius:7px;padding:7px 10px;display:flex;justify-content:space-between;margin-top:8px"><span style="color:#fff;font-weight:700">إجمالي الإيداعات</span><span style="color:#c8f0d8;font-weight:800">${fmt(dep)} ر.س</span></div>
+  </div>`:'' }
+  ${recFactTotal||recWorkTotal||recOtherTotal ? `
+  <div style="border:1px solid var(--bd);border-radius:9px;padding:12px;margin-bottom:10px">
+    <div style="font-size:12px;font-weight:700;color:var(--ok);margin-bottom:8px">📥 تفاصيل المقبوضات</div>
+    ${recFactTotal?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>🏭 مقبوضات المصنع</span><b>'+fmt(recFactTotal)+' ر.س</b></div>'+buildDetailTable(data.recFact):''}
+    ${recWorkTotal?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>🔧 مقبوضات الورشة</span><b>'+fmt(recWorkTotal)+' ر.س</b></div>'+buildDetailTable(data.recWork):''}
+    ${recOtherTotal?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>📬 مقبوضات أخرى</span><b>'+fmt(recOtherTotal)+' ر.س</b></div>'+buildDetailTable(data.recOther):''}
+    <div style="background:var(--p);border-radius:7px;padding:7px 10px;display:flex;justify-content:space-between;margin-top:8px"><span style="color:#fff;font-weight:700">إجمالي المقبوضات</span><span style="color:#c8deff;font-weight:800">${fmt(rec)} ر.س</span></div>
+  </div>`:'' }
+  <div style="background:${Math.abs(diff)<.005?'#e6f7ee':'#fdecea'};border:2px solid ${dc};border-radius:10px;padding:14px;text-align:center;margin-top:8px">
+    <div style="font-size:13px;font-weight:700;color:${dc};margin-bottom:6px">${dt}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><div style="font-size:11px;color:var(--mu)">جرد الخزينة</div><div style="font-size:20px;font-weight:800;color:var(--p)">${fmt(inv)}</div></div>
+      <div><div style="font-size:11px;color:var(--mu)">صافي النقدية المحاسبي</div><div style="font-size:20px;font-weight:800;color:var(--ok)">${fmt(net)}</div></div>
+    </div>
+    ${Math.abs(diff)>=.005?'<div style="font-size:18px;font-weight:800;color:'+dc+';margin-top:8px">الفرق: '+fmt(Math.abs(diff))+' ر.س</div>':''}
+  </div>`;
+
+  sec.style.display = 'block';
+  sec.scrollIntoView({behavior:'smooth'});
+}
+
+let _printReportUid = null;
+function printUserReport(){
+  if(!_currentViewedData || !_currentViewedUser) return;
+  const data = _currentViewedData;
+  const u = USERS[_currentViewedUser];
+  const ds = new Date().toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const sn=data.salesNet||0, ret=data.returnsNet||0, exp=data.expTotal||0;
+  const dep=data.depositTotal||0, rec=data.recTotal||0, inv=data.invTotal||0, op=data.opening||0;
+  const net=op+sn-ret-exp-dep+rec;
+  const diff=inv-net;
+  const rc=Math.abs(diff)<.005?'#1a7a4a':(diff>0?'#b57a00':'#b52a2a');
+  const rb=Math.abs(diff)<.005?'#e6f7ee':(diff>0?'#fff8e1':'#fdecea');
+  const rt=Math.abs(diff)<.005?'✓ مطابق':(diff>0?'⬆ زيادة':'⬇ عجز');
+
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+  <title>تقرير ${u?u.name:''}</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Tajawal',sans-serif;direction:rtl;padding:16px;font-size:12px}
+  .h{text-align:center;border-bottom:3px solid #1a3a5c;padding-bottom:10px;margin-bottom:14px}
+  .h h1{font-size:17px;font-weight:800;color:#1a3a5c}.h h2{font-size:13px;color:#c8972a;margin-top:3px}.h p{font-size:10px;color:#888;margin-top:2px}
+  .sec{border:1px solid #d4dde8;border-radius:7px;padding:10px;margin-bottom:10px}
+  .sec-t{font-size:12px;font-weight:700;color:#1a3a5c;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid #eef2f7}
+  table{width:100%;border-collapse:collapse;font-size:11px}th{background:#1a3a5c;color:#fff;padding:5px 7px;text-align:right}td{padding:4px 7px;border-bottom:1px solid #eef2f7}
+  .row{display:flex;justify-content:space-between;padding:3px 0;font-size:11px}
+  .tot{border-radius:6px;padding:7px 10px;display:flex;justify-content:space-between;margin-top:7px}
+  .res{border-radius:8px;padding:10px;text-align:center;margin-top:10px;border:2px solid ${rc};background:${rb}}
+  .fo{margin-top:14px;text-align:center;font-size:9px;color:#888;border-top:1px solid #ddd;padding-top:8px}
+  @media print{@page{size:A4;margin:12mm}body{padding:0}}</style></head><body>
+  <div class="h"><h1>شركة أركان لمنيف التجارية</h1><h2>تقرير إقفال الصندوق — ${u?u.name:''}</h2><p>س.ت 5950028336 | ${ds}</p></div>
+  <div class="sec"><div class="sec-t">ملخص اليوم</div>
+    <div class="row"><span>رصيد أول المدة</span><b>${fmt(op)} ر.س</b></div>
+    <div class="row"><span>إجمالي المبيعات</span><b>${fmt(data.salesTotal||0)} ر.س</b></div>
+    <div class="row"><span>صافي المبيعات النقدية</span><b>${fmt(sn)} ر.س</b></div>
+    <div class="row"><span>المردودات</span><b>${fmt(ret)} ر.س</b></div>
+    <div class="row"><span>الخرجيات</span><b>${fmt(exp)} ر.س</b></div>
+    <div class="row"><span>الإيداعات</span><b>${fmt(dep)} ر.س</b></div>
+    <div class="row"><span>المقبوضات</span><b>${fmt(rec)} ر.س</b></div>
+  </div>
+  <div class="res"><div style="font-size:13px;font-weight:700;color:${rc};margin-bottom:6px">${rt}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:11px">
+      <div><div style="color:#555">جرد الخزينة</div><div style="font-size:18px;font-weight:800;color:#1a3a5c">${fmt(inv)} ر.س</div></div>
+      <div><div style="color:#555">صافي النقدية</div><div style="font-size:18px;font-weight:800;color:#1a7a4a">${fmt(net)} ر.س</div></div>
+    </div>
+    ${Math.abs(diff)>=.005?'<div style="font-size:16px;font-weight:800;color:'+rc+';margin-top:7px">الفرق: '+fmt(Math.abs(diff))+' ر.س</div>':''}
+  </div>
+  <div class="fo">تقرير إقفال الصندوق | شركة أركان لمنيف التجارية | طُبع بواسطة: ${currentUser?currentUser.name:''} — تطوير: علوي الحذيفي 0551156419</div>
   <script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`);
   w.document.close();
 }
@@ -1545,6 +2099,170 @@ function initRows(){
 }
 initRows();
 // الخيارات ثابتة في HTML - لا حاجة لـ loadUserSettings
+// تحميل بيانات المستخدمين من Firebase عند بدء التشغيل
+(async function loadSavedUsers(){
+  try {
+    const saved = await loadData('arkan_users_config', false);
+    if(saved && typeof saved === 'object' && Object.keys(saved).length > 0){
+      // دمج البيانات المحفوظة مع الافتراضية مع الحفاظ على المدير
+      const merged = Object.assign({}, USERS);
+      Object.entries(saved).forEach(([id,u])=>{
+        if(id !== 'admin') merged[id] = u;
+      });
+      Object.assign(USERS, merged);
+    }
+  } catch(e){}
+  updateLoginSelect();
+})();
+
+// ===== نظام التحديث عبر الرابط =====
+// إصدار النظام الحالي — يُحدَّث يدوياً عند كل نشر
+const CURRENT_VERSION = '1.0.1';
+// مفتاح حفظ رابط التحديث في Firebase
+const UPDATE_URL_KEY  = 'arkan_update_url';
+const UPDATE_VER_KEY  = 'arkan_update_version';
+let _updateCheckTimer = null;
+let _pendingUpdateUrl = null;
+
+// حفظ رابط التحديث
+async function saveUpdateUrl(){
+  const url = document.getElementById('updateUrlInput')?.value?.trim();
+  if(!url){ showNotif('⚠️ أدخل رابطاً صحيحاً'); return; }
+  try { new URL(url); } catch(e){ showNotif('❌ الرابط غير صالح'); return; }
+  await saveData(UPDATE_URL_KEY, url, false);
+  showNotif('✅ تم حفظ رابط التحديث');
+  checkForUpdate();
+}
+
+// تحميل الرابط المحفوظ
+async function loadUpdateUrl(){
+  const url = await loadData(UPDATE_URL_KEY, false);
+  const inp = document.getElementById('updateUrlInput');
+  if(url && inp) inp.value = url;
+  return url || null;
+}
+
+// حذف رابط التحديث
+async function clearUpdateUrl(){
+  if(!confirm('هل تريد حذف رابط التحديث؟')) return;
+  if(_fbReady && _db) try{ await _db.ref('arkan/'+_fbKey(UPDATE_URL_KEY)).remove(); }catch(e){}
+  const inp = document.getElementById('updateUrlInput');
+  if(inp) inp.value = '';
+  _setUpdateUI('none', '—');
+  showNotif('🗑️ تم حذف الرابط');
+}
+
+// تعيين حالة واجهة التحديث
+function _setUpdateUI(state, msg, remoteVer){
+  const dot  = document.getElementById('updateDot');
+  const text = document.getElementById('updateStatusText');
+  const info = document.getElementById('updateVersionInfo');
+  const box  = document.getElementById('updateActionBox');
+  if(!dot) return;
+  const cfg = {
+    none:    { color:'#ccc',    label:'لا يوجد رابط تحديث مُعيَّن' },
+    checking:{ color:'#fbbf24', label:'جاري فحص التحديثات...' },
+    latest:  { color:'#4ade80', label:'✅ النظام محدَّث — لا يوجد إصدار جديد' },
+    update:  { color:'#f87171', label:'🆕 يوجد تحديث جديد!' },
+    error:   { color:'#f87171', label:'❌ تعذّر الاتصال بالرابط' },
+  }[state] || { color:'#ccc', label:'—' };
+  dot.style.background   = cfg.color;
+  if(text) text.textContent = msg || cfg.label;
+  if(info) info.textContent = `الإصدار الحالي: ${CURRENT_VERSION}` + (remoteVer ? ` ← الإصدار الجديد: ${remoteVer}` : '');
+  if(box)  box.style.display = state === 'update' ? 'block' : 'none';
+}
+
+// فحص التحديثات من الرابط
+async function checkForUpdate(){
+  const url = await loadUpdateUrl();
+  if(!url){ _setUpdateUI('none'); return; }
+
+  _setUpdateUI('checking');
+  try {
+    // نجلب الملف عبر fetch مع cache-busting
+    const res = await fetch(url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now(), {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+
+    const html = await res.text();
+
+    // نستخرج رقم الإصدار من المحتوى المُحمَّل
+    const verMatch = html.match(/const CURRENT_VERSION\s*=\s*['"]([^'"]+)['"]/);
+    const remoteVer = verMatch ? verMatch[1] : null;
+
+    // نقارن بالإصدار الحالي
+    const hasUpdate = remoteVer && remoteVer !== CURRENT_VERSION;
+
+    if(hasUpdate){
+      _pendingUpdateUrl = url;
+      _setUpdateUI('update', `🆕 إصدار جديد متاح`, remoteVer);
+      // تخزين البيانات في Firebase لإشعار بقية المستخدمين
+      await saveData(UPDATE_VER_KEY, { ver: remoteVer, url, ts: Date.now() }, false);
+      // إظهار البانر
+      const banner = document.getElementById('updateBanner');
+      if(banner) banner.style.display = 'block';
+      showNotif('🆕 يوجد تحديث جديد للنظام!');
+    } else {
+      _pendingUpdateUrl = url;
+      _setUpdateUI('latest', null, remoteVer);
+      // امسح أي إشعار قديم
+      if(_fbReady && _db) try{ await _db.ref('arkan/'+_fbKey(UPDATE_VER_KEY)).remove(); }catch(e){}
+    }
+  } catch(err){
+    console.warn('Update check failed:', err);
+    _setUpdateUI('error', '❌ تعذّر الاتصال بالرابط');
+  }
+}
+
+// تطبيق التحديث (إعادة تحميل من الرابط)
+async function applyUpdate(){
+  const url = _pendingUpdateUrl || (await loadUpdateUrl());
+  if(!url){ showNotif('⚠️ لا يوجد رابط تحديث'); return; }
+  if(!confirm('سيتم تحديث الصفحة الآن من الرابط المحفوظ. هل أنت متأكد؟')) return;
+  // نفتح الرابط في نفس النافذة
+  window.location.href = url;
+}
+
+// إشعار جميع المستخدمين عبر Firebase
+async function notifyAllUsersUpdate(){
+  const url = _pendingUpdateUrl || (await loadUpdateUrl());
+  if(!url){ showNotif('⚠️ لا يوجد رابط تحديث'); return; }
+  const ts = Date.now();
+  await saveData(UPDATE_VER_KEY, { ver: 'new', url, ts, notify: true }, false);
+  showNotif('📢 تم إرسال إشعار التحديث لجميع المستخدمين');
+}
+
+// مراقبة إشعارات التحديث من Firebase (لجميع المستخدمين)
+function watchForUpdateNotifications(){
+  if(!_fbReady || !_db) return;
+  _db.ref('arkan/'+_fbKey(UPDATE_VER_KEY)).on('value', snap => {
+    if(!snap.exists()) return;
+    const data = snap.val();
+    if(!data || !data.notify) return;
+    // إظهار البانر لجميع المستخدمين المتصلين
+    _pendingUpdateUrl = data.url;
+    const banner = document.getElementById('updateBanner');
+    if(banner) banner.style.display = 'block';
+    if(currentUser && currentUser.role !== 'admin'){
+      showNotif('🆕 يوجد تحديث جديد للنظام — يرجى التحديث');
+    }
+  });
+}
+
+// بدء الفحص الدوري (كل ساعة)
+function startUpdateChecker(){
+  checkForUpdate();
+  clearInterval(_updateCheckTimer);
+  _updateCheckTimer = setInterval(checkForUpdate, 60 * 60 * 1000); // كل ساعة
+  watchForUpdateNotifications();
+}
+
+// بدء الفحص عند تسجيل الدخول
+const _origDoLogin = doLogin;
+// تشغيل الفحص بعد ثانيتين من تحميل الصفحة (مستقل عن الدخول)
+setTimeout(()=>{ startUpdateChecker(); }, 2000);
 </script>
 </body>
 </html>
