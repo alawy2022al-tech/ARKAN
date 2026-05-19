@@ -1,48 +1,28 @@
-// Service Worker — أركان لمنيف التجارية
-const CACHE_NAME = 'arkan-v1.0.0';
-const ASSETS = [
-  './index_arkan.html',
-  './manifest.json',
-  'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap',
-  'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
-  'https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js'
-];
+const CACHE_NAME = 'arkan-v4';
+const urlsToCache = ['./', './index.html'];
 
-// تثبيت — تخزين الملفات
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(['./index_arkan.html', './manifest.json']);
-    })
-  );
   self.skipWaiting();
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(c => c.addAll(urlsToCache))
+  );
 });
 
-// تفعيل — حذف الكاش القديم
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// الطلبات — من الكاش أولاً، ثم الشبكة
 self.addEventListener('fetch', e => {
-  // Firebase يشتغل دائماً من الشبكة
-  if (e.request.url.includes('firebaseio.com') ||
-      e.request.url.includes('firebase') ||
-      e.request.url.includes('googleapis')) {
-    return;
-  }
+  // دائماً يجلب من الشبكة أولاً — يضمن ظهور آخر تحديث
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      return cached || fetch(e.request).then(response => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
-        return response;
-      });
-    }).catch(() => caches.match('./index_arkan.html'))
+    fetch(e.request).then(res => {
+      const clone = res.clone();
+      caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+      return res;
+    }).catch(() => caches.match(e.request))
   );
 });
