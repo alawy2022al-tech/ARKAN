@@ -127,7 +127,7 @@ input[readonly]{background:#f7fafd;color:var(--mu)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @media print{
   @page{size:A4;margin:8mm 8mm}
-  body{background:#fff;font-size:18px;font-weight:700}
+  body{background:#fff;font-size:12px;font-weight:600}
   .ah,.nav,.ph,.add-btn,.del,#printBtn,button,.notif,.modal-bg{display:none!important}
   .page{display:none!important;padding:0;max-width:100%}
   #page-report{display:block!important}
@@ -136,9 +136,9 @@ input[readonly]{background:#f7fafd;color:var(--mu)}
   .scard{padding:5px 4px!important}
   .sl{font-size:18px!important;font-weight:700!important;margin-bottom:2px!important}
   .sv{font-size:18px!important;font-weight:700!important}
-  table{font-size:18px;font-weight:700}
-  th{padding:4px 6px!important;font-size:18px!important;font-weight:700!important}
-  td{padding:3px 6px!important;font-size:18px!important;font-weight:700!important}
+  table{font-size:11px;font-weight:600}
+  th{padding:3px 5px!important;font-size:11px!important;font-weight:700!important}
+  td{padding:2px 5px!important;font-size:11px!important;font-weight:600!important}
   .ct{font-size:18px!important;font-weight:700!important;margin-bottom:5px!important;padding-bottom:4px!important}
   .fb{display:none!important}
   .rb{padding:8px!important;margin-top:6px!important}
@@ -2403,7 +2403,8 @@ function printInventory(){
       if(f||cnt) rows+=`<tr><td style="text-align:center">${num++}</td><td style="text-align:center;font-weight:700">${fmt(f)}</td><td style="text-align:center">${cnt}</td><td style="text-align:center;font-weight:700;background:#eaf2ff">${fmt(sub)}</td></tr>`;
     }
   });
-  const now2=new Date();const ds=now2.toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const _invDate = new Date((_currentViewDate||TODAY)+'T00:00:00');
+  const ds=_invDate.toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const w=window.open('','_blank');
   w.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet"><title>جرد الصندوق</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Tajawal',sans-serif;direction:rtl;padding:16px}.h{text-align:center;border-bottom:3px solid #1a3a5c;padding-bottom:10px;margin-bottom:14px}.h h1{font-size:17px;font-weight:800;color:#1a3a5c}.h h2{font-size:13px;color:#c8972a;margin-top:3px}.h p{font-size:10px;color:#888;margin-top:2px}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#1a3a5c;color:#fff;padding:6px 8px;text-align:right}td{padding:5px 8px;border-bottom:1px solid #eef2f7}.fo{margin-top:12px;text-align:center;font-size:9px;color:#888;border-top:1px solid #ddd;padding-top:8px}@media print{@page{size:A4;margin:12mm}body{padding:0}}</style></head><body>
   <div class="h"><h1>شركة أركان لمنيف التجارية</h1><h2>📦 جرد الصندوق</h2><p>س.ت 5950028336 | ${ds}</p></div>
@@ -2415,7 +2416,8 @@ function printInventory(){
 }
 
 function printSales(){
-  const now2=new Date();const ds=now2.toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const _salDate = new Date((_currentViewDate||TODAY)+'T00:00:00');
+  const ds=_salDate.toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   let crR='',netR='',trR='',othR='';
   const rowsOf=(id)=>{let r='';document.querySelectorAll('#'+id+' tr').forEach(tr=>{const n=tr.querySelector('input[type=number]'),t=tr.querySelector('input[type=text]');const v=parseFloat((n||{}).value||0)||0;if(v)r+=`<tr><td>${(t&&t.value)||'—'}</td><td style="text-align:center;font-weight:700">${fmt(v)}</td></tr>`;});return r;};
   crR=rowsOf('creditBody');netR=rowsOf('networkBody');trR=rowsOf('transferBody');othR=rowsOf('salesOtherBody');
@@ -2548,8 +2550,11 @@ function printUserReport(){
   if(!_currentViewedData || !_currentViewedUser) return;
   const data = _currentViewedData;
   const u = USERS[_currentViewedUser];
-  const today = new Date().toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const todayNum = new Date().toLocaleDateString('ar-SA');
+  // استخدام تاريخ الإقرار المختار وليس تاريخ اليوم الحالي
+  const reportDateIso = data.date || _currentViewDate || TODAY;
+  const reportDateObj = new Date(reportDateIso + 'T00:00:00');
+  const today    = reportDateObj.toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const todayNum = reportDateObj.toLocaleDateString('ar-SA');
   const fmtN = v => (Math.round(v*100)/100).toLocaleString('ar-SA',{minimumFractionDigits:2,maximumFractionDigits:2});
 
   // حسابات
@@ -2769,22 +2774,32 @@ function printUserReport(){
   // ══════════════════════════════════════════════
   const page3 = `<div class="pg">
     ${pgHdr('💰','تفاصيل المبيعات والمردودات')}
-    <div class="sec">
-      <div class="sec-t">💰 المبيعات</div>
-      <div class="row-line"><span>إجمالي المبيعات</span><b>${fmtN(data.salesTotal||0)} ر.س</b></div>
-      ${data.salesDisc?`<div class="row-line" style="color:#b52a2a"><span>− خصميات</span><span>${fmtN(data.salesDisc)} ر.س</span></div>`:''}
-      ${creditTotal?subHead('📋','آجل',creditTotal,'#1a3a5c','#eaf2ff')+'<table><thead><tr><th>الإيضاح</th><th style="width:130px;text-align:left">المبلغ</th></tr></thead><tbody>'+detailRows(data.credit)+'</tbody></table>':''}
-      ${networkTotal?subHead('🏧','شبكة / شيكات',networkTotal,'#1a3a5c','#eaf2ff')+'<table><thead><tr><th>الإيضاح</th><th style="width:130px;text-align:left">المبلغ</th></tr></thead><tbody>'+detailRows(data.network)+'</tbody></table>':''}
-      ${transferTotal?subHead('💳','تحويلات',transferTotal,'#1a3a5c','#eaf2ff')+'<table><thead><tr><th>الإيضاح</th><th style="width:130px;text-align:left">المبلغ</th></tr></thead><tbody>'+detailRows(data.transfer)+'</tbody></table>':''}
-      ${salesOtherTotal?subHead('📌','متعلقات',salesOtherTotal,'#888','#f7f9fc')+'<table><thead><tr><th>الإيضاح</th><th style="width:130px;text-align:left">المبلغ</th></tr></thead><tbody>'+detailRows(data.salesOther)+'</tbody></table>':''}
-      ${sumBar('✓ صافي المبيعات النقدية',sn,'#1a7a4a','#fff')}
+    <!-- ملخص المبيعات — يُمنع كسره -->
+  <div class="sec">
+    <div class="sec-t">💰 المبيعات</div>
+    <div class="row-line"><span>إجمالي المبيعات</span><b>${fmtN(data.salesTotal||0)} ر.س</b></div>
+    ${data.salesDisc?`<div class="row-line" style="color:#b52a2a"><span>− خصميات</span><span>${fmtN(data.salesDisc)} ر.س</span></div>`:''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:6px 0;font-size:10px">
+      ${creditTotal?`<div style="background:#eaf2ff;border-radius:5px;padding:5px 8px;display:flex;justify-content:space-between"><span>📋 آجل</span><b>${fmtN(creditTotal)}</b></div>`:''}
+      ${networkTotal?`<div style="background:#eaf2ff;border-radius:5px;padding:5px 8px;display:flex;justify-content:space-between"><span>🏧 شبكة</span><b>${fmtN(networkTotal)}</b></div>`:''}
+      ${transferTotal?`<div style="background:#eaf2ff;border-radius:5px;padding:5px 8px;display:flex;justify-content:space-between"><span>💳 تحويلات</span><b>${fmtN(transferTotal)}</b></div>`:''}
+      ${salesOtherTotal?`<div style="background:#f7f9fc;border-radius:5px;padding:5px 8px;display:flex;justify-content:space-between"><span>📌 متعلقات</span><b>${fmtN(salesOtherTotal)}</b></div>`:''}
     </div>
-    <div class="sec">
-      <div class="sec-t" style="color:#b52a2a">↩️ المردودات</div>
-      ${retSalesTotal?subHead('↩️','مردود المبيعات',retSalesTotal,'#b52a2a','#fdf4f4')+'<table><thead><tr><th>الإيضاح</th><th style="width:130px;text-align:left">المبلغ</th></tr></thead><tbody>'+detailRows(data.retSales)+'</tbody></table>':'<div style="color:#aaa;font-size:11px;padding:5px">لا توجد مردودات</div>'}
-      ${retOtherTotal?subHead('📌','متعلقات',retOtherTotal,'#888','#f7f9fc')+'<table><thead><tr><th>الإيضاح</th><th style="width:130px;text-align:left">المبلغ</th></tr></thead><tbody>'+detailRows(data.retOther)+'</tbody></table>':''}
-      ${sumBar('صافي المردودات',ret,'#b52a2a','#ffd0d0')}
-    </div>
+    ${sumBar('✓ صافي المبيعات النقدية',sn,'#1a7a4a','#fff')}
+  </div>
+  <!-- تفاصيل الآجل — كل مجموعة في subsec مستقل -->
+  ${creditTotal?`<div class="subsec">${subHead('📋','تفاصيل الآجل',creditTotal,'#1a3a5c','#eaf2ff')}<table><thead><tr><th>الإيضاح</th><th style="width:120px;text-align:left">المبلغ</th></tr></thead><tbody>${detailRows(data.credit)}</tbody></table></div>`:''}
+  ${networkTotal?`<div class="subsec">${subHead('🏧','تفاصيل الشبكة',networkTotal,'#1a3a5c','#eaf2ff')}<table><thead><tr><th>الإيضاح</th><th style="width:120px;text-align:left">المبلغ</th></tr></thead><tbody>${detailRows(data.network)}</tbody></table></div>`:''}
+  ${transferTotal?`<div class="subsec">${subHead('💳','تفاصيل التحويلات',transferTotal,'#1a3a5c','#eaf2ff')}<table><thead><tr><th>الإيضاح</th><th style="width:120px;text-align:left">المبلغ</th></tr></thead><tbody>${detailRows(data.transfer)}</tbody></table></div>`:''}
+  ${salesOtherTotal?`<div class="subsec">${subHead('📌','متعلقات المبيعات',salesOtherTotal,'#888','#f7f9fc')}<table><thead><tr><th>الإيضاح</th><th style="width:120px;text-align:left">المبلغ</th></tr></thead><tbody>${detailRows(data.salesOther)}</tbody></table></div>`:''}
+  <!-- المردودات -->
+  <div class="sec">
+    <div class="sec-t" style="color:#b52a2a">↩️ المردودات</div>
+    ${retSalesTotal?subHead('↩️','مردود المبيعات',retSalesTotal,'#b52a2a','#fdf4f4'):'<div style="color:#aaa;font-size:10px;padding:4px">لا توجد مردودات</div>'}
+    ${retSalesTotal?`<table><thead><tr><th>الإيضاح</th><th style="width:120px;text-align:left">المبلغ</th></tr></thead><tbody>${detailRows(data.retSales)}</tbody></table>`:''}
+    ${retOtherTotal?subHead('📌','متعلقات',retOtherTotal,'#888','#f7f9fc')+'<table><thead><tr><th>الإيضاح</th><th style="width:120px;text-align:left">المبلغ</th></tr></thead><tbody>'+detailRows(data.retOther)+'</tbody></table>':''}
+    ${sumBar('صافي المردودات',ret,'#b52a2a','#ffd0d0')}
+  </div>
     ${pgFtr()}
   </div>`;
 
@@ -2793,14 +2808,20 @@ function printUserReport(){
   // ══════════════════════════════════════════════
   const page4 = `<div class="pg">
     ${pgHdr('📤','الخرجيات والإيداعات والمقبوضات')}
-    <div class="sec">
-      <div class="sec-t" style="color:#b57a00">📤 الخرجيات</div>
-      ${custodyTotal?subHead('💼','العهد',custodyTotal,'#b57a00','#fff8e1')+'<table><thead><tr><th>الإيضاح</th><th style="width:130px;text-align:left">المبلغ</th></tr></thead><tbody>'+detailRows(data.custody)+'</tbody></table>':''}
-      ${expSubTotal?subHead('📋','المصاريف',expSubTotal,'#b57a00','#fff8e1')+'<table><thead><tr><th>البيان</th><th style="width:130px;text-align:left">المبلغ</th></tr></thead><tbody>'+detailRows(data.exp)+'</tbody></table>':''}
-      ${advTotal?subHead('💳','السلف',advTotal,'#b57a00','#fff8e1')+'<table><thead><tr><th>الاسم</th><th style="width:130px;text-align:left">المبلغ</th></tr></thead><tbody>'+detailRows(data.adv)+'</tbody></table>':''}
-      ${!custodyTotal&&!expSubTotal&&!advTotal?'<div style="color:#aaa;font-size:12px;padding:8px">لا توجد خرجيات</div>':''}
-      ${sumBar('إجمالي الخرجيات',exp,'#b57a00','#fff3cd')}
+    <!-- ملخص الخرجيات -->
+  <div class="sec">
+    <div class="sec-t" style="color:#b57a00">📤 الخرجيات</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin:4px 0;font-size:10px">
+      ${custodyTotal?`<div style="background:#fff8e1;border-radius:5px;padding:5px 8px;display:flex;justify-content:space-between"><span>💼 العهد</span><b>${fmtN(custodyTotal)}</b></div>`:''}
+      ${expSubTotal?`<div style="background:#fff8e1;border-radius:5px;padding:5px 8px;display:flex;justify-content:space-between"><span>📋 مصاريف</span><b>${fmtN(expSubTotal)}</b></div>`:''}
+      ${advTotal?`<div style="background:#fff8e1;border-radius:5px;padding:5px 8px;display:flex;justify-content:space-between"><span>💳 سلف</span><b>${fmtN(advTotal)}</b></div>`:''}
     </div>
+    ${!custodyTotal&&!expSubTotal&&!advTotal?'<div style="color:#aaa;font-size:10px;padding:5px">لا توجد خرجيات</div>':''}
+    ${sumBar('إجمالي الخرجيات',exp,'#b57a00','#fff3cd')}
+  </div>
+  ${custodyTotal?`<div class="subsec">${subHead('💼','تفاصيل العهد',custodyTotal,'#b57a00','#fff8e1')}<table><thead><tr><th>الإيضاح</th><th style="width:120px;text-align:left">المبلغ</th></tr></thead><tbody>${detailRows(data.custody)}</tbody></table></div>`:''}
+  ${expSubTotal?`<div class="subsec">${subHead('📋','تفاصيل المصاريف',expSubTotal,'#b57a00','#fff8e1')}<table><thead><tr><th>البيان</th><th style="width:120px;text-align:left">المبلغ</th></tr></thead><tbody>${detailRows(data.exp)}</tbody></table></div>`:''}
+  ${advTotal?`<div class="subsec">${subHead('💳','تفاصيل السلف',advTotal,'#b57a00','#fff8e1')}<table><thead><tr><th>الاسم</th><th style="width:120px;text-align:left">المبلغ</th></tr></thead><tbody>${detailRows(data.adv)}</tbody></table></div>`:''}
     <div class="sec">
       <div class="sec-t" style="color:#1a5c3a">🏧 الإيداعات البنكية</div>
       <table><thead><tr><th>البيان</th><th style="width:130px;text-align:left">المبلغ</th></tr></thead>
@@ -2876,17 +2897,22 @@ function printUserReport(){
   </div>`;
 
   const CSS=`*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Tajawal',sans-serif;direction:rtl;padding:10mm;font-size:18px;font-weight:700;color:#1a2533;background:#fff}
-.pg{page-break-after:always}.pg:last-child{page-break-after:auto}
-.sec{border:1px solid #d4dde8;border-radius:8px;padding:11px 13px;margin-bottom:10px;page-break-inside:avoid}
-.sec-t{font-size:20px;font-weight:800;color:#1a3a5c;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #eaf2ff}
-table{width:100%;border-collapse:collapse;font-size:18px}
-th{background:#1a3a5c;color:#fff;padding:8px 11px;text-align:right;font-size:17px;font-weight:800}
-td{padding:7px 11px;border-bottom:1px solid #eef2f7;font-size:18px;font-weight:700}
+body{font-family:'Tajawal',sans-serif;direction:rtl;padding:10mm;font-size:12px;font-weight:600;color:#1a2533;background:#fff}
+.pg{break-after:page;page-break-after:always}.pg:last-child{break-after:auto;page-break-after:auto}
+/* السكشن الرئيسية — تمنع الكسر بداخلها */
+.sec{border:1px solid #d4dde8;border-radius:8px;padding:9px 12px;margin-bottom:8px;break-inside:avoid;page-break-inside:avoid;orphans:3;widows:3}
+/* السكشن الفرعية — تسمح بالكسر بينها لكن ليس داخلها */
+.subsec{border:1px solid #eef2f7;border-radius:7px;padding:7px 10px;margin-bottom:7px;break-inside:avoid;page-break-inside:avoid}
+.sec-t{font-size:13px;font-weight:800;color:#1a3a5c;margin-bottom:7px;padding-bottom:5px;border-bottom:2px solid #eaf2ff}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:#1a3a5c;color:#fff;padding:5px 8px;text-align:right;font-size:11px;font-weight:800}
+td{padding:4px 8px;border-bottom:1px solid #eef2f7;font-size:11px;font-weight:600}
 tr:nth-child(even) td{background:#f9fbfd}
-.row-line{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed #eef2f7;font-size:18px;font-weight:700}
+thead{display:table-header-group}
+tr{break-inside:avoid;page-break-inside:avoid}
+.row-line{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed #eef2f7;font-size:11px;font-weight:700}
 .row-line:last-child{border-bottom:none}
-@media print{@page{size:A4;margin:10mm 12mm}body{padding:0}.pg{page-break-after:always}.pg:last-child{page-break-after:auto}}`;
+@media print{@page{size:A4;margin:10mm 12mm}body{padding:0}.pg{break-after:page;page-break-after:always}.pg:last-child{break-after:auto;page-break-after:auto}}`;
 
   const w=window.open('','_blank');
   w.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
